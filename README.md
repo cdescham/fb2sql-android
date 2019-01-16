@@ -1,7 +1,11 @@
-$ git submodule add my_sub_project_git_url my-sub-project
-Then include the project in your settings.gradle file which should look like this
-include ':my-app', ':my-sub-project'
-Finally, compile the project as a dependency in your application build.gradle file like this
-dependencies {
-  compile project(':my-sub-project')
-}
+(c) Inventivelink SARL 2019
+
+Firebase to SQL Wrapper for Android.
+
+dependencies : API Platform DB
+
+to run unit tests : 
+
+adb shell am instrument -w -r   -e debug true -e class 'inventivelink.com.fb2sql.SQLDatabaseInstrumentedTestYM' inventivelink.com.fb2sql.test/android.support.test.runner.AndroidJUnitRunner
+
+
