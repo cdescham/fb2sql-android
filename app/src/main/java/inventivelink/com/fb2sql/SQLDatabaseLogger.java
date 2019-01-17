@@ -6,19 +6,19 @@ public class SQLDatabaseLogger {
 
     public static String SQLDATABASE_TAG = "[SQLDATABASE]";
 
-    public static void Logd(Object o) {
+    public static void debug(Object o) {
         Log.d(SQLDATABASE_TAG,o != null ? o.toString() : null);
     }
 
-    public static void Logi(Object o) {
+    public static void info(Object o) {
         Log.i(SQLDATABASE_TAG,o != null ? o.toString() : null);
     }
 
-    public static void Logw(Object o) {
+    public static void warn(Object o) {
         Log.i(SQLDATABASE_TAG,o != null ? o.toString() : null);
     }
 
-    public static void Loge(Object o) {
+    public static void error(Object o) {
         Log.i(SQLDATABASE_TAG,o != null ? o.toString() : null);
     }
 

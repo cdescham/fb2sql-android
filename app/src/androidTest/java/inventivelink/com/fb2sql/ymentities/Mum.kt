@@ -1,13 +1,13 @@
 package fr.heymum.yoomum.bo
 
 import com.google.firebase.database.Exclude
-import com.google.firebase.database.PropertyName
 
 class Mum(
+    var mumId : String ? = null,
     val firstName:String? = null,
     val lastName:String? = null,
     var photo:String? = null,
-    @get:PropertyName("dateOfBirth") @set:PropertyName("dateOfBirth") var cocoaDateOfBirth:Long? = null,
+    var dateOfBirth:Long? = null,
     val email:String? = null,
     val phoneNumber:String? = null,
     val postalCode:String? = null,
@@ -18,7 +18,7 @@ class Mum(
     val status:String? = null,
     val state:String? = null,
     val deactivated:Boolean? = null,
-    val children:Map<String, Child>? = mapOf(),
+    var children:List<Child>? =null,
     val interests:List<String>? = mutableListOf(),
     val locations:List<String>? = mutableListOf(),
     val events:MutableList<String>? = mutableListOf(),
@@ -30,5 +30,5 @@ class Mum(
     @set:Exclude @get:Exclude var identifier:String? = null,
     @set:Exclude @get:Exclude var feedIdentifier:String? = null,
     @set:Exclude @get:Exclude var feedType:FeedType? = null,
-    @get:PropertyName("lastConnectionTimestamp") @set:PropertyName("lastConnectionTimestamp") var cocoaLastConnectionTimestamp:Long? = null
+    var lastConnectionTimestamp:Long? = null
 )

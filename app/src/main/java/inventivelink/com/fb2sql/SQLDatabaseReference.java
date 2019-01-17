@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.annotations.PublicApi;
 
 
 public class SQLDatabaseReference {
@@ -17,6 +18,7 @@ public class SQLDatabaseReference {
         this.table = table;
     }
 
+    @PublicApi
     public SQLDatabaseReference child(@NonNull String child) {
         if (table == null)
             table = child;
@@ -25,20 +27,22 @@ public class SQLDatabaseReference {
         return  this;
     }
 
-    public Task<SQLDataSnapshot> setValue(@Nullable Object object) {
+    @PublicApi
+    public Task<SQLDatabaseSnapshot> setValue(@Nullable Object object) {
         if (object == null)
-            return  SQLRepo.delete(table,id).getTask();
+            return  SQLApiPlatformStore.delete(table,id).getTask();
         else if (id == null)
-            return  SQLRepo.insert(table,object).getTask();
+            return  SQLApiPlatformStore.insert(table,object).getTask();
         else
-            return  SQLRepo.update(table,id,object).getTask();
+            return  SQLApiPlatformStore.update(table,id,object).getTask();
     }
 
+    @PublicApi
     public void addListenerForSingleValueEvent(@NonNull final SQLValueEventListener listener) {
-        Task<SQLDataSnapshot> source = SQLRepo.get(table,id).getTask();
-        source.addOnCompleteListener(new OnCompleteListener<SQLDataSnapshot>() {
+        Task<SQLDatabaseSnapshot> source = SQLApiPlatformStore.get(table,id).getTask();
+        source.addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
             @Override
-            public void onComplete(final @NonNull Task<SQLDataSnapshot> task) {
+            public void onComplete(final @NonNull Task<SQLDatabaseSnapshot> task) {
                 if (task.isSuccessful())
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -50,49 +54,15 @@ public class SQLDatabaseReference {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onCancelled(new SQLDatabaseError(task.getException()));
+                            listener.onCancelled(new SQLDatabaseException(task.getException()));
                         }
                     });
             }
         });
     }
+
 }
 
-
-/**
- * Set the data at this location to the given value. Passing null to setValue() will delete the
- * data at the specified location. The native types accepted by this method for the value
- * correspond to the JSON types:
- *
- * <ul>
- *   <li>Boolean
- *   <li>Long
- *   <li>Double
- *   <li>String
- *   <li>Map&lt;String, Object&gt;
- *   <li>List&lt;Object&gt;
- * </ul>
- *
- * <br>
- * <br>
- * In addition, you can set instances of your own class into this location, provided they satisfy
- * the following constraints:
- *
- * <ol>
- *   <li>The class must have a default constructor that takes no arguments
- *   <li>The class must define public getters for the properties to be assigned. Properties
- *       without a public getter will be set to their default value when an instance is
- *       deserialized
- * </ol>
- *
- * <br>
- * <br>
- * Generic collections of objects that satisfy the above constraints are also permitted, i.e.
- * <code>Map&lt;String, MyPOJO&gt;</code>, as well as null values.
- *
- * @param value The value to set at this location or null to delete the existing data
- * @return The {@link Task} for this operation.
- */
 
 //
 

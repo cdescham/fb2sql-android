@@ -16,26 +16,26 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
 
-public class SQLRepo {
+public class SQLApiPlatformStore {
 
-    public static TaskCompletionSource<SQLDataSnapshot> insert(String table, Object object) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> insert(String table, Object object) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         Gson gson = new Gson();
         String point = endpoint.uriString+"/"+table;
         Request request = new Request.Builder()
                 .url(point)
                 .post(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
                 .build();
-        enqueueRequestForEndpoint(source,request,endpoint);
-        SQLDatabaseLogger.Logd("POST:"+point);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201);
+        SQLDatabaseLogger.debug("POST:"+point);
 
         return source;
     }
 
-    public static TaskCompletionSource<SQLDataSnapshot> update(String table, String id, Object object) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> update(String table, String id, Object object) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         Gson gson = new Gson();
         String point = endpoint.uriString+"/"+table+"/"+id;
 
@@ -43,34 +43,34 @@ public class SQLRepo {
                 .url(point)
                 .put(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
                 .build();
-        enqueueRequestForEndpoint(source,request,endpoint);
-        SQLDatabaseLogger.Logd("PUT:"+point);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200);
+        SQLDatabaseLogger.debug("PUT:"+point);
         return source;
     }
 
-    public static TaskCompletionSource<SQLDataSnapshot> get(String table, String id) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> get(String table, String id) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString+"/"+table+ (id != null ? "/"+id : "" );
         Request request = new Request.Builder()
                 .url(point)
                 .get()
                 .build();
-        enqueueRequestForEndpoint(source,request,endpoint);
-        SQLDatabaseLogger.Logd("GET:"+point);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200);
+        SQLDatabaseLogger.debug("GET:"+point);
         return source;
     }
 
-    public static TaskCompletionSource<SQLDataSnapshot> delete(String table, String id) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> delete(String table, String id) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString+"/" + table + "/" + id;
         Request request = new Request.Builder()
                 .url(endpoint.uriString+"/" + table + "/" + id )
                 .delete()
                 .build();
-        enqueueRequestForEndpoint(source,request,endpoint);
-        SQLDatabaseLogger.Logd("DELETE:"+point);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,204);
+        SQLDatabaseLogger.debug("DELETE:"+point);
         return source;
     }
 
@@ -91,7 +91,7 @@ public class SQLRepo {
         return builder.build();
     }
 
-    private static void enqueueRequestForEndpoint(final TaskCompletionSource<SQLDataSnapshot> source,Request request,SQLDatabaseEndpoint endpoint) {
+    private static void enqueueRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDatabaseSnapshot> source, Request request, SQLDatabaseEndpoint endpoint,final int successReturnCode) {
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -101,9 +101,9 @@ public class SQLRepo {
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
                     String responseString = response.body().string();
-                    SQLDatabaseLogger.Logd(responseString);
-                    if (response.code() == 200) {
-                        source.setResult(new SQLDataSnapshot(responseString));
+                    SQLDatabaseLogger.debug(responseString);
+                    if (response.code() == successReturnCode) {
+                        source.setResult(new SQLDatabaseSnapshot(responseString));
                     } else {
                         source.setException(new Exception("response : "+response.code()));
                     }

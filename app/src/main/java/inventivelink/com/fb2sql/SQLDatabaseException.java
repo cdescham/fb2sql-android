@@ -2,15 +2,15 @@ package inventivelink.com.fb2sql;
 
 import android.support.annotation.NonNull;
 
-public class SQLDatabaseError extends Exception {
+public class SQLDatabaseException extends Exception {
 
     String reason = null;
 
-    public SQLDatabaseError(@NonNull String reason) {
+    public SQLDatabaseException(@NonNull String reason) {
         this.reason = reason;
     }
 
-    public SQLDatabaseError(@NonNull Exception e) {
+    public SQLDatabaseException(@NonNull Exception e) {
         super(e);
     }
 

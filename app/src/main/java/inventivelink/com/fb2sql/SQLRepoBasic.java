@@ -22,9 +22,9 @@ import okhttp3.Route;
 
 public class SQLRepoBasic {
 
-    public static TaskCompletionSource<SQLDataSnapshot> runQuery(String action, String table, String pk, Object object) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> runQuery(String action, String table, String pk, Object object) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
 
         JSONObject parameters= new JSONObject();
         try {
@@ -60,7 +60,7 @@ public class SQLRepoBasic {
                     String responseString = response.body().string();
                     JSONObject o = new JSONObject(responseString);
                     if (o.getBoolean("success")) {
-                        source.setResult(new SQLDataSnapshot(o.getString("data")));
+                        source.setResult(new SQLDatabaseSnapshot(o.getString("data")));
                     } else {
                         source.setException(new Exception(responseString));
                     }
