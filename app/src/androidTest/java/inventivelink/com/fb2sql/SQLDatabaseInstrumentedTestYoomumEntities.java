@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(AndroidJUnit4.class)
-public class SQLDatabaseInstrumentedTestYM {
+public class SQLDatabaseInstrumentedTestYoomumEntities {
 
     private int inProgressCount = 0;
 
