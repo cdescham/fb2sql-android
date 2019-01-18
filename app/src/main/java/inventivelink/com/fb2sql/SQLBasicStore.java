@@ -1,3 +1,10 @@
+/*************************************************************************
+ *
+ *  Copyright (c) [2009] - [2019] Inventivelink
+ *  All Rights Reserved.
+ *
+ ************************************************************************/
+
 package inventivelink.com.fb2sql;
 
 import android.os.Handler;
@@ -20,7 +27,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.Route;
 
-public class SQLRepoBasic {
+public class SQLBasicStore {
 
     public static TaskCompletionSource<SQLDatabaseSnapshot> runQuery(String action, String table, String pk, Object object) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();

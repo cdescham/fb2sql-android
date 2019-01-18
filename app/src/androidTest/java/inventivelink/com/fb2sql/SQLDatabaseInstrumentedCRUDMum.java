@@ -1,3 +1,10 @@
+/*************************************************************************
+ *
+ *  Copyright (c) [2009] - [2019] Inventivelink
+ *  All Rights Reserved.
+ *
+ ************************************************************************/
+
 package inventivelink.com.fb2sql;
 
 import android.support.annotation.NonNull;
@@ -16,6 +23,7 @@ import java.util.List;
 
 import fr.heymum.yoomum.bo.Child;
 import fr.heymum.yoomum.bo.Mum;
+import fr.heymum.yoomum.bo.MumGeoLocation;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,7 +44,7 @@ public class SQLDatabaseInstrumentedCRUDMum {
 
     @Before
     public void commonBeforeAll() {
-        SQLDatabase.getInstance().setEndPoint("http://192.168.2.3:8000/api","test","test",3,10,10,30);
+        SQLDatabase.getInstance().setEndPoint("http://192.168.1.99:8000/api","test","test",3,10,10,30);
     }
 
     @Test
@@ -52,6 +60,8 @@ public class SQLDatabaseInstrumentedCRUDMum {
         children.add(c1);
         m.setChildren(children);
 
+        MumGeoLocation l = new MumGeoLocation();
+        m.setLocation(l);
 
         SQLDatabase.getInstance().getReference("mums").setValue(m).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
             @Override

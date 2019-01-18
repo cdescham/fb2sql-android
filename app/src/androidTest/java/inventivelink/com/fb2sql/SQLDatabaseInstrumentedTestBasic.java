@@ -1,3 +1,11 @@
+/*************************************************************************
+ *
+ *  Copyright (c) [2009] - [2019] Inventivelink
+ *  All Rights Reserved.
+ *
+ ************************************************************************/
+
+
 package inventivelink.com.fb2sql;
 
 import android.content.Context;

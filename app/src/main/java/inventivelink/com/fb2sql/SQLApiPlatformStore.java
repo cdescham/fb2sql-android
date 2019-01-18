@@ -1,3 +1,11 @@
+/*************************************************************************
+ *
+ *  Copyright (c) [2009] - [2019] Inventivelink
+ *  All Rights Reserved.
+ *
+ ************************************************************************/
+
+
 package inventivelink.com.fb2sql;
 
 import com.google.android.gms.tasks.TaskCompletionSource;
@@ -23,6 +31,7 @@ public class SQLApiPlatformStore {
         final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         Gson gson = new Gson();
         String point = endpoint.uriString+"/"+table;
+        SQLDatabaseLogger.debug("[insert] " + point +" "+gson.toJson(object));
         Request request = new Request.Builder()
                 .url(point)
                 .post(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
@@ -38,7 +47,7 @@ public class SQLApiPlatformStore {
         final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         Gson gson = new Gson();
         String point = endpoint.uriString+"/"+table+"/"+id;
-
+        SQLDatabaseLogger.debug("[update] " + point +" "+gson.toJson(object));
         Request request = new Request.Builder()
                 .url(point)
                 .put(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
@@ -48,10 +57,11 @@ public class SQLApiPlatformStore {
         return source;
     }
 
-    public static TaskCompletionSource<SQLDatabaseSnapshot> get(String table, String id) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> get(String table, String id, String geoSearch) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString+"/"+table+ (id != null ? "/"+id : "" );
+        SQLDatabaseLogger.debug("[get] " + point );
         Request request = new Request.Builder()
                 .url(point)
                 .get()
@@ -65,6 +75,7 @@ public class SQLApiPlatformStore {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString+"/" + table + "/" + id;
+        SQLDatabaseLogger.debug("[delete] " + point );
         Request request = new Request.Builder()
                 .url(endpoint.uriString+"/" + table + "/" + id )
                 .delete()
@@ -101,7 +112,7 @@ public class SQLApiPlatformStore {
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
                     String responseString = response.body().string();
-                    SQLDatabaseLogger.debug(responseString);
+                    SQLDatabaseLogger.debug("[response] code = " + response.code()+" "+responseString );
                     if (response.code() == successReturnCode) {
                         source.setResult(new SQLDatabaseSnapshot(responseString));
                     } else {

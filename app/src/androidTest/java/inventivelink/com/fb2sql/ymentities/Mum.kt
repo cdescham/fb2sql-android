@@ -21,6 +21,7 @@ class Mum(
     var children:List<Child>? =null,
     val interests:List<String>? = mutableListOf(),
     val locations:List<String>? = mutableListOf(),
+    var location:MumGeoLocation? = null,
     val events:MutableList<String>? = mutableListOf(),
     val eventsInvited:MutableList<String>? = mutableListOf(),
     val conversations:List<String>? = mutableListOf(),

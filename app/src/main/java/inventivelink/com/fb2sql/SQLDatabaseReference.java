@@ -1,3 +1,10 @@
+/*************************************************************************
+ *
+ *  Copyright (c) [2009] - [2019] Inventivelink
+ *  All Rights Reserved.
+ *
+ ************************************************************************/
+
 package inventivelink.com.fb2sql;
 
 import android.os.Handler;
@@ -13,6 +20,8 @@ import com.google.firebase.annotations.PublicApi;
 public class SQLDatabaseReference {
     private String table = null;
     private String id = null;
+    private String geoSearch = null;
+
 
     public SQLDatabaseReference(String table) {
         this.table = table;
@@ -28,6 +37,12 @@ public class SQLDatabaseReference {
     }
 
     @PublicApi
+    public SQLDatabaseReference withinPerimeter(@NonNull Double latitude,@NonNull Double longitude,Double distance) {
+        geoSearch = "geo_search/"+latitude+"/"+longitude+"/"+distance;
+        return  this;
+    }
+
+    @PublicApi
     public Task<SQLDatabaseSnapshot> setValue(@Nullable Object object) {
         if (object == null)
             return  SQLApiPlatformStore.delete(table,id).getTask();
@@ -39,7 +54,7 @@ public class SQLDatabaseReference {
 
     @PublicApi
     public void addListenerForSingleValueEvent(@NonNull final SQLValueEventListener listener) {
-        Task<SQLDatabaseSnapshot> source = SQLApiPlatformStore.get(table,id).getTask();
+        Task<SQLDatabaseSnapshot> source = SQLApiPlatformStore.get(table,id,geoSearch).getTask();
         source.addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
             @Override
             public void onComplete(final @NonNull Task<SQLDatabaseSnapshot> task) {
