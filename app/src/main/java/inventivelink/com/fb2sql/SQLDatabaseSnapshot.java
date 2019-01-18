@@ -48,15 +48,16 @@ public class SQLDatabaseSnapshot {
         return new Iterable<SQLDatabaseSnapshot>() {
             @Override
             public Iterator<SQLDatabaseSnapshot> iterator() {
+                final Iterator<JsonElement> c = children.iterator();
                 return new Iterator<SQLDatabaseSnapshot>() {
                     @Override
                     public boolean hasNext() {
-                        return children.iterator().hasNext();
+                        return c.hasNext();
                     }
                     @Override
                     @NonNull
                     public SQLDatabaseSnapshot next() {
-                        return new SQLDatabaseSnapshot( children.iterator().next().toString());
+                        return new SQLDatabaseSnapshot( c.next().toString());
                     }
                     @Override
                     public void remove() {
