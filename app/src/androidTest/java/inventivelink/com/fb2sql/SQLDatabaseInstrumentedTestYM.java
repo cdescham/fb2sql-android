@@ -28,6 +28,7 @@ import fr.heymum.yoomum.bo.Event;
 import fr.heymum.yoomum.bo.FeedItem;
 import fr.heymum.yoomum.bo.Mum;
 
+import static inventivelink.com.fb2sql.TestCommon.connectSQLDatabase;
 import static org.junit.Assert.assertEquals;
 
 
@@ -47,7 +48,7 @@ public class SQLDatabaseInstrumentedTestYM {
 
     @Before
     public void commonBeforeAll() {
-        SQLDatabase.getInstance().setEndPoint("http://172.20.10.2:8000/api","test","test",3,10,10,30);
+        connectSQLDatabase();
     }
 
     @Test

@@ -21,6 +21,7 @@ public class SQLDatabaseReference {
     private String table = null;
     private String id = null;
     private String geoSearch = null;
+    private String parameters = null;
 
 
     public SQLDatabaseReference(String table) {
@@ -33,6 +34,18 @@ public class SQLDatabaseReference {
             table = child;
         else
             id = child;
+        return  this;
+    }
+
+    // Limited to simple query parameters
+    private void addParameter(String key,Object value) {
+        String toAdd = key+"="+value;
+        parameters = parameters != null ? parameters + "&"+toAdd : toAdd;
+    }
+
+    @PublicApi
+    public SQLDatabaseReference limitToFirst(Integer limit) {
+        addParameter("itemsPerPage",limit);
         return  this;
     }
 
@@ -54,7 +67,7 @@ public class SQLDatabaseReference {
 
     @PublicApi
     public void addListenerForSingleValueEvent(@NonNull final SQLValueEventListener listener) {
-        Task<SQLDatabaseSnapshot> source = SQLApiPlatformStore.get(table,id,geoSearch).getTask();
+        Task<SQLDatabaseSnapshot> source = SQLApiPlatformStore.get(table,id,geoSearch,parameters).getTask();
         source.addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
             @Override
             public void onComplete(final @NonNull Task<SQLDatabaseSnapshot> task) {

@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.Task;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static inventivelink.com.fb2sql.TestCommon.connectSQLDatabase;
 import static org.junit.Assert.assertEquals;
 
 
@@ -33,7 +34,7 @@ public class SQLDatabaseInstrumentedTestBasic {
 
     @Test
     public void CRUD() {
-        SQLDatabase.getInstance().setEndPoint("http://192.168.1.99/ym/sql.php","test","test",3,10,10,30);
+        connectSQLDatabase();
         // C
         final TestEntity e = new TestEntity();
         e.setS("a");

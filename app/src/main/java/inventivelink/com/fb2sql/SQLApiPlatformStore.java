@@ -57,10 +57,10 @@ public class SQLApiPlatformStore {
         return source;
     }
 
-    public static TaskCompletionSource<SQLDatabaseSnapshot> get(String table, String id, String geoSearch) {
+    public static TaskCompletionSource<SQLDatabaseSnapshot> get(String table, String id, String geoSearch,String parameters) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
-        String point = endpoint.uriString+"/"+table+ (id != null ? "/"+id : ( geoSearch != null ? "/"+geoSearch : "") );
+        String point = endpoint.uriString+"/"+table+ (id != null ? "/"+id : ( geoSearch != null ? "/"+geoSearch : "") +"?"+parameters);
         SQLDatabaseLogger.debug("[get] " + point );
         Request request = new Request.Builder()
                 .url(point)
