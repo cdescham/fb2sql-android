@@ -37,8 +37,8 @@ public class SQLDatabaseReference {
     }
 
     @PublicApi
-    public SQLDatabaseReference withinPerimeter(@NonNull Double latitude,@NonNull Double longitude,Double distance) {
-        geoSearch = "geo_search/"+latitude+"/"+longitude+"/"+distance;
+    public SQLDatabaseReference withinPerimeter(@NonNull Double latitude,@NonNull Double longitude,Integer distance,String unit) {
+        geoSearch = "geo_search/"+latitude+"/"+longitude+"/"+distance+unit;
         return  this;
     }
 
@@ -75,7 +75,6 @@ public class SQLDatabaseReference {
             }
         });
     }
-
 }
 
 

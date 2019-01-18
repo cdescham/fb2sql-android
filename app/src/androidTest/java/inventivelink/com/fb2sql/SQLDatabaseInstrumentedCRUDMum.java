@@ -26,6 +26,7 @@ import fr.heymum.yoomum.bo.Mum;
 import fr.heymum.yoomum.bo.MumGeoLocation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 
 @RunWith(AndroidJUnit4.class)
@@ -104,6 +105,69 @@ public class SQLDatabaseInstrumentedCRUDMum {
         });
 
     }
+
+    @Test
+    public void geoSearchMum() {
+        incTestsCount(1);
+        final Mum venceMum = new Mum();
+        final String key = SQLDatabase.getInstance().generateKey();
+        venceMum.setMumId(key);
+        MumGeoLocation l = new MumGeoLocation();
+        l.setLatitude(43.716667);
+        l.setLongitude(7.116667);
+        venceMum.setLocation(l);
+
+        SQLDatabase.getInstance().getReference("mums").setValue(venceMum).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+                if (!task.isSuccessful())
+                    task.getException().printStackTrace();
+                assertEquals(task.isSuccessful(),true);
+                // shouldl find one
+                SQLDatabase.getInstance().getReference("mums").withinPerimeter(venceMum.getLocation().getLatitude(),venceMum.getLocation().getLongitude(),10,"km").addListenerForSingleValueEvent(new SQLValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+                        Iterable<SQLDatabaseSnapshot> mums = s.getChildren();
+                        int count = 0;
+                        for (SQLDatabaseSnapshot mum : mums) {
+                            Mum e = mum.getValue(Mum.class);
+                            assertEquals(false,e.getLocation() == null);
+                            count ++;
+                        }
+                        assertNotEquals(count,0);
+                        // shouldl not find one
+                        incTestsCount(1);
+                        SQLDatabase.getInstance().getReference("mums").withinPerimeter(0d,0d,10,"km").addListenerForSingleValueEvent(new SQLValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+                                Iterable<SQLDatabaseSnapshot> mums = s.getChildren();
+                                int count = 0;
+                                for (SQLDatabaseSnapshot mum : mums) {
+                                    count ++;
+                                }
+                                assertEquals(count,0);
+                                incTestsCount(-1);
+                            }
+                            @Override
+                            public void onCancelled(@NonNull SQLDatabaseException e) {
+                                SQLDatabaseLogger.error(e);
+                                assertEquals(true,false);
+                            }
+                        });
+                    }
+                    @Override
+                    public void onCancelled(@NonNull SQLDatabaseException e) {
+                        SQLDatabaseLogger.error(e);
+                        assertEquals(true,false);
+                    }
+                });
+            }
+        });
+
+    }
+
+
+
 
     @After
     public void after() throws Exception{
