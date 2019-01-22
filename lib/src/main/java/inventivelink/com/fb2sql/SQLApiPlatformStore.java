@@ -37,7 +37,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .post(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
                 .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201,null);
         SQLDatabaseLogger.debug("POST:"+point);
 
         return source;
@@ -54,7 +54,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .put(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
                 .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,id);
         SQLDatabaseLogger.debug("PUT:"+point);
         return source;
     }
@@ -69,7 +69,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .get()
                 .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,id);
         SQLDatabaseLogger.debug("GET:"+point);
         return source;
     }
@@ -84,7 +84,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .delete()
                 .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,204);
+        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,204,id);
         SQLDatabaseLogger.debug("DELETE:"+point);
         return source;
     }
@@ -106,7 +106,7 @@ public class SQLApiPlatformStore {
         return builder.build();
     }
 
-    private static void enqueueRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDatabaseSnapshot> source, Request request, SQLDatabaseEndpoint endpoint,final int successReturnCode) {
+    private static void enqueueRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDatabaseSnapshot> source, Request request, SQLDatabaseEndpoint endpoint,final int successReturnCode,final String id) {
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -118,11 +118,12 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("[response] code = " + response.code()+" "+responseString );
                     if (response.code() == successReturnCode) {
-                        source.setResult(new SQLDatabaseSnapshot(responseString));
+                        source.setResult(new SQLDatabaseSnapshot(responseString,id));
                     } else {
                         source.setException(new Exception("response : "+response.code()));
                     }
                 } catch (Exception e) {
+                    SQLDatabaseLogger.error("[response] exception = " + e );
                     e.printStackTrace();
                     source.setException(e);
                 }

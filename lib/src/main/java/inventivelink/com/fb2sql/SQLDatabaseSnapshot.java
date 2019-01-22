@@ -22,9 +22,12 @@ import java.util.Map;
 
 public class SQLDatabaseSnapshot {
     private String jsonString;
+    private String key;
 
-    public SQLDatabaseSnapshot(String jsonString) {
+
+    public SQLDatabaseSnapshot(String jsonString,String key) {
         this.jsonString = jsonString;
+        this.key = key;
     }
 
     @PublicApi
@@ -38,6 +41,12 @@ public class SQLDatabaseSnapshot {
             return  null;
         }
         return CustomClassMapper.convertToCustomClass(value, valueType);
+    }
+
+
+    @PublicApi
+    public String getKey() {
+        return key;
     }
 
     @PublicApi
@@ -57,7 +66,7 @@ public class SQLDatabaseSnapshot {
                     @Override
                     @NonNull
                     public SQLDatabaseSnapshot next() {
-                        return new SQLDatabaseSnapshot( c.next().toString());
+                        return new SQLDatabaseSnapshot( c.next().toString(),null);
                     }
                     @Override
                     public void remove() {

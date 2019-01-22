@@ -41,8 +41,8 @@ task clearJar(type: Delete){
 }
 
 task makeJar(type: Copy) {
-    from ('build/intermediates/bundles/release/')
-    into ('build/libs/')
+    from ('./lib/build/intermediates/packaged-classes/debug/')
+    into ('build/')
     include ('classes.jar')
     rename('classes.jar', 'fb2sql.jar')
 }

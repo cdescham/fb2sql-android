@@ -67,7 +67,7 @@ public class SQLBasicStore {
                     String responseString = response.body().string();
                     JSONObject o = new JSONObject(responseString);
                     if (o.getBoolean("success")) {
-                        source.setResult(new SQLDatabaseSnapshot(o.getString("data")));
+                        source.setResult(new SQLDatabaseSnapshot(o.getString("data"),null));
                     } else {
                         source.setException(new Exception(responseString));
                     }

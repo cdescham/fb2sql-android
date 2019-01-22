@@ -9,6 +9,7 @@ package inventivelink.com.fb2sql;
 
 import android.net.Uri;
 
+import com.google.firebase.annotations.PublicApi;
 import com.google.firebase.database.core.utilities.PushIdGenerator;
 
 public class SQLDatabase {
@@ -46,6 +47,7 @@ public class SQLDatabase {
 
     // Configuration
 
+    @PublicApi
     public SQLDatabase setUri(String uriString) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -53,6 +55,7 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
     public SQLDatabase setAuthUser(String authUser) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -60,6 +63,7 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
     public SQLDatabase setAuthPass(String authPass) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -67,6 +71,7 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
     public SQLDatabase setAuthToken(String authToken) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -74,6 +79,7 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
     public SQLDatabase setConnectionTimeout(int connectionTimeout) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -81,6 +87,7 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
     public SQLDatabase setReadTimeout(int readTimeout) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -88,6 +95,7 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
     public SQLDatabase setWriteTimeout(int writeTimeout) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
@@ -95,6 +103,11 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
+    public SQLDatabase setLogVerbosity(int verbosity) {
+        SQLDatabaseLogger.verbosity = verbosity;
+        return this;
+    }
 
 }
 
