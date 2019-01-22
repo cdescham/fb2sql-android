@@ -34,6 +34,7 @@ public class SQLApiPlatformStore {
         SQLDatabaseLogger.debug("[insert] " + point +" "+gson.toJson(object));
         Request request = new Request.Builder()
                 .url(point)
+                .header("X-AUTH-TOKEN", endpoint.authToken)
                 .post(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
                 .build();
         enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201);
@@ -50,6 +51,7 @@ public class SQLApiPlatformStore {
         SQLDatabaseLogger.debug("[update] " + point +" "+gson.toJson(object));
         Request request = new Request.Builder()
                 .url(point)
+                .header("X-AUTH-TOKEN", endpoint.authToken)
                 .put(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
                 .build();
         enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200);
@@ -64,6 +66,7 @@ public class SQLApiPlatformStore {
         SQLDatabaseLogger.debug("[get] " + point );
         Request request = new Request.Builder()
                 .url(point)
+                .header("X-AUTH-TOKEN", endpoint.authToken)
                 .get()
                 .build();
         enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200);
@@ -78,6 +81,7 @@ public class SQLApiPlatformStore {
         SQLDatabaseLogger.debug("[delete] " + point );
         Request request = new Request.Builder()
                 .url(endpoint.uriString+"/" + table + "/" + id )
+                .header("X-AUTH-TOKEN", endpoint.authToken)
                 .delete()
                 .build();
         enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,204);

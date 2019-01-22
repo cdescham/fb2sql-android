@@ -55,11 +55,20 @@ public class SQLDatabaseInstrumentedCRUDMum {
         final Mum m = new Mum();
         final String key = SQLDatabase.getInstance().generateKey();
         m.setMumId(key);
+
+
         Child c1 = new Child();
         c1.setName("Samuel");
         c1.setChildId(SQLDatabase.getInstance().generateKey());
+
+        Child c2 = new Child();
+        c2.setName("Tristan");
+        c2.setChildId(SQLDatabase.getInstance().generateKey());
+
+
         List children =  new ArrayList<Child>();
         children.add(c1);
+        children.add(c2);
         m.setChildren(children);
 
         MumGeoLocation l = new MumGeoLocation();
@@ -76,12 +85,19 @@ public class SQLDatabaseInstrumentedCRUDMum {
                     @Override
                     public void onDataChange(@NonNull SQLDatabaseSnapshot var1) {
                         Mum e1 = var1.getValue(Mum.class);
-                        assertEquals(m.getMumId(),e1.getMumId());
                         assertEquals(m.getChildren().size(),e1.getChildren().size());
+                        e1.setDateOfBirth(null);
+                        e1.setLastConnectionTimestamp(null);
+
+
+                        assertEquals(m.getMumId(),e1.getMumId());
+                        e1.getChildren().get(0).setDateOfBirth(null);
+                        e1.getChildren().get(1).setDateOfBirth(null);
+
+                        e1.setPhoto("http://someurl");
 
                         // U
-                        m.setChildren(null);
-                        SQLDatabase.getInstance().getReference("mums").child(key).setValue(m).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+                        SQLDatabase.getInstance().getReference("mums").child(key).setValue(e1).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
                                 assertEquals(task.isSuccessful(),true);

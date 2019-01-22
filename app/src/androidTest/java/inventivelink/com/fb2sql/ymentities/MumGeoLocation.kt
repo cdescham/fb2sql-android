@@ -9,7 +9,5 @@ import com.google.firebase.database.Exclude
 data class MumGeoLocation(
     var latitude:Double? = 48.866667,
     var longitude:Double? = 2.333333,
-
-    @Exclude
     var mumIdentifier:String? = null
 )

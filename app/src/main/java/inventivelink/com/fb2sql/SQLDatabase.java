@@ -7,6 +7,8 @@
 
 package inventivelink.com.fb2sql;
 
+import android.net.Uri;
+
 import com.google.firebase.database.core.utilities.PushIdGenerator;
 
 public class SQLDatabase {
@@ -30,9 +32,6 @@ public class SQLDatabase {
         return  new SQLDatabaseReference(path);
     }
 
-    public void setEndPoint(String uriString, String authUser, String authPass,int authRetries, int connectionTimeout, int readTimeout, int writeTimeout) {
-        endPoint = new SQLDatabaseEndpoint(uriString,authUser,authPass,authRetries,connectionTimeout,readTimeout,writeTimeout);
-    }
 
     public SQLDatabaseEndpoint getEndPoint() {
         if (endPoint == null)
@@ -42,6 +41,58 @@ public class SQLDatabase {
 
     public String generateKey() {
         return PushIdGenerator.generatePushChildName(System.currentTimeMillis());
+    }
+
+
+    // Configuration
+
+    public SQLDatabase setUri(String uriString) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.uriString = uriString;
+        return this;
+    }
+
+    public SQLDatabase setAuthUser(String authUser) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.authUser = authUser;
+        return this;
+    }
+
+    public SQLDatabase setAuthPass(String authPass) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.authPass = authPass;
+        return this;
+    }
+
+    public SQLDatabase setAuthToken(String authToken) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.authToken = authToken;
+        return this;
+    }
+
+    public SQLDatabase setConnectionTimeout(int connectionTimeout) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.connectionTimeout = connectionTimeout;
+        return this;
+    }
+
+    public SQLDatabase setReadTimeout(int readTimeout) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.readTimeout = readTimeout;
+        return this;
+    }
+
+    public SQLDatabase setWriteTimeout(int writeTimeout) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.writeTimeout = writeTimeout;
+        return this;
     }
 
 
