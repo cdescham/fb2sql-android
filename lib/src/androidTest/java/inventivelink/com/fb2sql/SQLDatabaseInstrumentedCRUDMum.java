@@ -89,7 +89,6 @@ public class SQLDatabaseInstrumentedCRUDMum {
                         e1.setDateOfBirth(null);
                         e1.setLastConnectionTimestamp(null);
 
-
                         assertEquals(m.getMumId(),e1.getMumId());
                         e1.getChildren().get(0).setDateOfBirth(null);
                         e1.getChildren().get(1).setDateOfBirth(null);
