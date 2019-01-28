@@ -26,42 +26,13 @@ import okhttp3.Route;
 
 public class SQLApiPlatformStore {
 
-    public static TaskCompletionSource<SQLDatabaseSnapshot> insert(String table, Object object) {
-        SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
-        Gson gson = new Gson();
-        String point = endpoint.uriString+"/"+table;
-        SQLDatabaseLogger.debug("[insert] " + point +" "+gson.toJson(object));
-        Request request = new Request.Builder()
-                .url(point)
-                .header("X-AUTH-TOKEN", endpoint.authToken)
-                .post(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
-                .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201,null);
-        SQLDatabaseLogger.debug("POST:"+point);
+    private static MediaType mediaTypeJSON = MediaType.parse("application/json");
+    private static MediaType mediaTypeLD_JSON = MediaType.parse("application/ld+json");
 
-        return source;
-    }
 
-    public static TaskCompletionSource<SQLDatabaseSnapshot> update(String table, String id, Object object) {
+    public static TaskCompletionSource<SQLDataSnapshot> get(String table, String id, String geoSearch, String parameters) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
-        Gson gson = new Gson();
-        String point = endpoint.uriString+"/"+table+"/"+id;
-        SQLDatabaseLogger.debug("[update] " + point +" "+gson.toJson(object));
-        Request request = new Request.Builder()
-                .url(point)
-                .header("X-AUTH-TOKEN", endpoint.authToken)
-                .put(RequestBody.create(MediaType.parse("application/json"),gson.toJson(object)))
-                .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,id);
-        SQLDatabaseLogger.debug("PUT:"+point);
-        return source;
-    }
-
-    public static TaskCompletionSource<SQLDatabaseSnapshot> get(String table, String id, String geoSearch,String parameters) {
-        SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString+"/"+table+ (id != null ? "/"+id : ( geoSearch != null ? "/"+geoSearch : "") +"?"+parameters);
         SQLDatabaseLogger.debug("[get] " + point );
         Request request = new Request.Builder()
@@ -69,14 +40,49 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .get()
                 .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,id);
+        enqueueReadRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,id);
         SQLDatabaseLogger.debug("GET:"+point);
         return source;
     }
 
-    public static TaskCompletionSource<SQLDatabaseSnapshot> delete(String table, String id) {
+    public static TaskCompletionSource<Void> insert(String table, Object object) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        final TaskCompletionSource<SQLDatabaseSnapshot> source = new TaskCompletionSource<>();
+        final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
+        Gson gson = new Gson();
+        String point = endpoint.uriString+"/"+table;
+        SQLDatabaseLogger.debug("[insert] " + point +" "+gson.toJson(object));
+        Request request = new Request.Builder()
+                .url(point)
+                .header("X-AUTH-TOKEN", endpoint.authToken)
+                .post(RequestBody.create(mediaTypeLD_JSON,gson.toJson(object)))
+                .build();
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201,null);
+        SQLDatabaseLogger.debug("POST:"+point);
+
+        return source;
+    }
+
+    public static TaskCompletionSource<Void> update(String table, String id, Object object) {
+        SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
+        final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
+        Gson gson = new Gson();
+        String point = endpoint.uriString+"/"+table+"/"+id;
+        SQLDatabaseLogger.debug("[update] " + point +" "+gson.toJson(object));
+        Request request = new Request.Builder()
+                .url(point)
+                .header("X-AUTH-TOKEN", endpoint.authToken)
+                .put(RequestBody.create(mediaTypeLD_JSON,gson.toJson(object)))
+                .build();
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,id);
+        SQLDatabaseLogger.debug("PUT:"+point);
+        return source;
+    }
+
+
+
+    public static TaskCompletionSource<Void> delete(String table, String id) {
+        SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
+        final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
         String point = endpoint.uriString+"/" + table + "/" + id;
         SQLDatabaseLogger.debug("[delete] " + point );
         Request request = new Request.Builder()
@@ -84,7 +90,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .delete()
                 .build();
-        enqueueRequestForEndpointAndExpectedReturnCode(source,request,endpoint,204,id);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source,request,endpoint,204,id);
         SQLDatabaseLogger.debug("DELETE:"+point);
         return source;
     }
@@ -106,7 +112,7 @@ public class SQLApiPlatformStore {
         return builder.build();
     }
 
-    private static void enqueueRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDatabaseSnapshot> source, Request request, SQLDatabaseEndpoint endpoint,final int successReturnCode,final String id) {
+    private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id) {
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -118,7 +124,32 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("[response] code = " + response.code()+" "+responseString );
                     if (response.code() == successReturnCode) {
-                        source.setResult(new SQLDatabaseSnapshot(responseString,id));
+                        source.setResult(new SQLDataSnapshot(responseString,id));
+                    } else {
+                        source.setException(new Exception("response : "+response.code()));
+                    }
+                } catch (Exception e) {
+                    SQLDatabaseLogger.error("[response] exception = " + e );
+                    e.printStackTrace();
+                    source.setException(e);
+                }
+            }
+        });
+    }
+
+    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, Request request, SQLDatabaseEndpoint endpoint,final int successReturnCode,final String id) {
+        getClient(endpoint).newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                source.setException(e);
+            }
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+                try {
+                    String responseString = response.body().string();
+                    SQLDatabaseLogger.debug("[response] code = " + response.code()+" "+responseString );
+                    if (response.code() == successReturnCode) {
+                        source.setResult(null);
                     } else {
                         source.setException(new Exception("response : "+response.code()));
                     }

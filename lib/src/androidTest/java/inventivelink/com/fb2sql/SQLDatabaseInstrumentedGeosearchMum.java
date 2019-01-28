@@ -18,10 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import fr.heymum.yoomum.bo.Child;
 import fr.heymum.yoomum.bo.Mum;
 import fr.heymum.yoomum.bo.MumGeoLocation;
 
@@ -61,19 +57,19 @@ public class SQLDatabaseInstrumentedGeosearchMum {
         l.setLongitude(7.116667);
         venceMum.setLocation(l);
 
-        SQLDatabase.getInstance().getReference("mums").setValue(venceMum).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+        SQLDatabase.getInstance().getReference("mums").setValue(venceMum).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+            public void onComplete(@NonNull Task<Void> task) {
                 if (!task.isSuccessful())
                     task.getException().printStackTrace();
                 assertEquals(task.isSuccessful(),true);
                 // shouldl find one
-                SQLDatabase.getInstance().getReference("mums").withinPerimeter(venceMum.getLocation().getLatitude(),venceMum.getLocation().getLongitude(),10,"km").addListenerForSingleValueEvent(new SQLValueEventListener() {
+                SQLDatabase.getInstance().getReference("mums").queryAtLocation(venceMum.getLocation().getLatitude(),venceMum.getLocation().getLongitude(),10d,"km").addListenerForSingleValueEvent(new SQLValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
-                        Iterable<SQLDatabaseSnapshot> mums = s.getChildren();
+                    public void onDataChange(@NonNull SQLDataSnapshot s) {
+                        Iterable<SQLDataSnapshot> mums = s.getChildren();
                         int count = 0;
-                        for (SQLDatabaseSnapshot mum : mums) {
+                        for (SQLDataSnapshot mum : mums) {
                             Mum e = mum.getValue(Mum.class);
                             assertEquals(false,e.getLocation() == null);
                             count ++;
@@ -81,26 +77,26 @@ public class SQLDatabaseInstrumentedGeosearchMum {
                         assertNotEquals(count,0);
                         // shouldl not find one
                         incTestsCount(1);
-                        SQLDatabase.getInstance().getReference("mums").withinPerimeter(0d,0d,10,"km").addListenerForSingleValueEvent(new SQLValueEventListener() {
+                        SQLDatabase.getInstance().getReference("mums").queryAtLocation(0d,0d,10d,"km").addListenerForSingleValueEvent(new SQLValueEventListener() {
                             @Override
-                            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
-                                Iterable<SQLDatabaseSnapshot> mums = s.getChildren();
+                            public void onDataChange(@NonNull SQLDataSnapshot s) {
+                                Iterable<SQLDataSnapshot> mums = s.getChildren();
                                 int count = 0;
-                                for (SQLDatabaseSnapshot mum : mums) {
+                                for (SQLDataSnapshot mum : mums) {
                                     count ++;
                                 }
                                 assertEquals(count,0);
                                 incTestsCount(-1);
                             }
                             @Override
-                            public void onCancelled(@NonNull SQLDatabaseException e) {
+                            public void onCancelled(@NonNull SQLDatabaseError e) {
                                 SQLDatabaseLogger.error(e);
                                 assertEquals(true,false);
                             }
                         });
                     }
                     @Override
-                    public void onCancelled(@NonNull SQLDatabaseException e) {
+                    public void onCancelled(@NonNull SQLDatabaseError e) {
                         SQLDatabaseLogger.error(e);
                         assertEquals(true,false);
                     }

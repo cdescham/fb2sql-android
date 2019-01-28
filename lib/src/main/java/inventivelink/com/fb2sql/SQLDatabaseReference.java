@@ -15,10 +15,16 @@ import android.support.annotation.Nullable;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.annotations.PublicApi;
+import com.google.firebase.database.core.utilities.encoding.CustomClassMapper;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SQLDatabaseReference {
     private String table = null;
     private String id = null;
+    private String property = null;
     private String geoSearch = null;
     private String parameters = null;
     private Object pivotfield = null;
@@ -32,8 +38,10 @@ public class SQLDatabaseReference {
     public SQLDatabaseReference child(@NonNull String child) {
         if (table == null)
             table = child;
-        else
+        else if (id == null)
             id = child;
+        else
+            property = child;
         return  this;
     }
 
@@ -41,6 +49,10 @@ public class SQLDatabaseReference {
     private void addParameter(String key,Object value) {
         String toAdd = key+"="+value;
         parameters = parameters != null ? parameters + "&"+toAdd : toAdd;
+    }
+
+    private String getParameters() {
+        return parameters != null ? parameters :"";
     }
 
     @PublicApi
@@ -97,14 +109,14 @@ public class SQLDatabaseReference {
 
 
     @PublicApi
-    public SQLDatabaseReference withinPerimeter(@NonNull Double latitude, @NonNull Double longitude, Integer distance, String unit) {
+    public SQLDatabaseReference queryAtLocation(@NonNull Double latitude, @NonNull Double longitude, Double distance, String unit) {
         geoSearch = "geo_search/"+latitude+"/"+longitude+"/"+distance+unit;
         return  this;
     }
 
 
     @PublicApi
-    public Task<SQLDatabaseSnapshot> setValue(@Nullable Object object) {
+    public Task<Void> setValue(@Nullable Object object) {
         if (object == null)
             return  SQLApiPlatformStore.delete(table,id).getTask();
         else if (id == null)
@@ -113,12 +125,30 @@ public class SQLDatabaseReference {
             return  SQLApiPlatformStore.update(table,id,object).getTask();
     }
 
+    @NonNull
+    @PublicApi
+    public Task<Void> updateChildren(@NonNull Map<String, Object> update) {
+        try {
+            if (property != null) {
+                ArrayList<Object> objects = new ArrayList<>(update.values());
+                Map<String, Object> compound = new HashMap<>();
+                compound.put(property, objects);
+                update = compound;
+            }
+            final Map<String, Object> bouncedUpdate = CustomClassMapper.convertToPlainJavaTypes(update);
+            SQLDatabaseLogger.debug(update);
+            return SQLApiPlatformStore.update(table, id, bouncedUpdate).getTask();
+        } catch (Exception e) {
+            return new SQLDatabaseError(e).asVoidTask();
+        }
+    }
+
     @PublicApi
     public void addListenerForSingleValueEvent(@NonNull final SQLValueEventListener listener) {
-        Task<SQLDatabaseSnapshot> source = SQLApiPlatformStore.get(table,id,geoSearch,parameters).getTask();
-        source.addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+        Task<SQLDataSnapshot> source = SQLApiPlatformStore.get(table,id,geoSearch,getParameters()).getTask();
+        source.addOnCompleteListener(new OnCompleteListener<SQLDataSnapshot>() {
             @Override
-            public void onComplete(final @NonNull Task<SQLDatabaseSnapshot> task) {
+            public void onComplete(final @NonNull Task<SQLDataSnapshot> task) {
                 if (task.isSuccessful())
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
@@ -130,10 +160,41 @@ public class SQLDatabaseReference {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
-                            listener.onCancelled(new SQLDatabaseException(task.getException()));
+                            listener.onCancelled(new SQLDatabaseError(task.getException()));
                         }
                     });
             }
         });
     }
+
+
+
+    @PublicApi
+    public void addGeoQueryEventListener(@NonNull final SQLGeoQueryEventListener listener) {
+        Task<SQLDataSnapshot> source = SQLApiPlatformStore.get(table,id,geoSearch,getParameters()).getTask();
+        source.addOnCompleteListener(new OnCompleteListener<SQLDataSnapshot>() {
+            @Override
+            public void onComplete(final @NonNull Task<SQLDataSnapshot> task) {
+                if (task.isSuccessful())
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            SQLDataSnapshot list = task.getResult();
+                            for (SQLDataSnapshot s : list.getChildren()) {
+                                listener.onKeyEntered(s);
+                            }
+                            listener.onGeoQueryReady();
+                        }
+                    });
+                else
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.onGeoQueryError(new SQLDatabaseError(task.getException()));
+                        }
+                    });
+            }
+        });
+    }
+
 }

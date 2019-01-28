@@ -74,36 +74,36 @@ public class SQLDatabaseInstrumentedCRUDMum {
         MumGeoLocation l = new MumGeoLocation();
         m.setLocation(l);
 
-        SQLDatabase.getInstance().getReference("mums").setValue(m).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+        SQLDatabase.getInstance().getReference("mums").setValue(m).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+            public void onComplete(@NonNull Task<Void> task) {
                 if (!task.isSuccessful())
                     task.getException().printStackTrace();
                 assertEquals(task.isSuccessful(),true);
                 // R
                 SQLDatabase.getInstance().getReference("mums").child(key).addListenerForSingleValueEvent(new SQLValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull SQLDatabaseSnapshot var1) {
+                    public void onDataChange(@NonNull SQLDataSnapshot var1) {
                         Mum e1 = var1.getValue(Mum.class);
                         assertEquals(m.getChildren().size(),e1.getChildren().size());
                         e1.setDateOfBirth(null);
                         e1.setLastConnectionTimestamp(null);
 
                         assertEquals(m.getMumId(),e1.getMumId());
-                        e1.getChildren().get(0).setDateOfBirth(null);
-                        e1.getChildren().get(1).setDateOfBirth(null);
+                        e1.getChildren().get(0).setDateOfBirth(0L);
+                        e1.getChildren().get(1).setDateOfBirth(0L);
 
                         e1.setPhoto("http://someurl");
 
                         // U
-                        SQLDatabase.getInstance().getReference("mums").child(key).setValue(e1).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+                        SQLDatabase.getInstance().getReference("mums").child(key).setValue(e1).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
-                            public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+                            public void onComplete(@NonNull Task<Void> task) {
                                 assertEquals(task.isSuccessful(),true);
                                 // D
-                                SQLDatabase.getInstance().getReference("mums").child(key).setValue(null).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+                                SQLDatabase.getInstance().getReference("mums").child(key).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
-                                    public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+                                    public void onComplete(@NonNull Task<Void> task) {
                                         SQLDatabaseLogger.info(m);
                                         assertEquals(task.isSuccessful(),true);
                                         incTestsCount(-1);
@@ -113,7 +113,7 @@ public class SQLDatabaseInstrumentedCRUDMum {
                         });
                     }
                     @Override
-                    public void onCancelled(@NonNull SQLDatabaseException var1) {
+                    public void onCancelled(@NonNull SQLDatabaseError var1) {
                         assertEquals(true,false);
                     }
                 });

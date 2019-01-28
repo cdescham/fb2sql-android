@@ -10,16 +10,10 @@ package inventivelink.com.fb2sql;
 import android.support.annotation.NonNull;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import fr.heymum.yoomum.bo.Address;
 import fr.heymum.yoomum.bo.Child;
@@ -56,14 +50,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("events").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Event e = s.getValue(Event.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -75,14 +69,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("childrens").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Child e = s.getValue(Child.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -95,14 +89,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("event_comments").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Comment e = s.getValue(Comment.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -115,14 +109,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("feeds").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 FeedItem e = s.getValue(FeedItem.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -134,14 +128,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("feed_comments").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Comment e = s.getValue(Comment.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -153,14 +147,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("locations").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Address e = s.getValue(Address.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -172,14 +166,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("locations_comments").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Comment e = s.getValue(Comment.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -191,14 +185,14 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("mums").child("1").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
                 Mum e = s.getValue(Mum.class);
                 SQLDatabaseLogger.info(e);
                 assertEquals(false,e == null);
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
@@ -211,9 +205,9 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("mums").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
-                Iterable<SQLDatabaseSnapshot> mums = s.getChildren();
-                for (SQLDatabaseSnapshot mum : mums) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
+                Iterable<SQLDataSnapshot> mums = s.getChildren();
+                for (SQLDataSnapshot mum : mums) {
                     Mum e = mum.getValue(Mum.class);
                     SQLDatabaseLogger.info(e);
                     assertEquals(false,e == null);
@@ -221,7 +215,7 @@ public class SQLDatabaseInstrumentedTestYoomumEntities {
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }

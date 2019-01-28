@@ -7,8 +7,6 @@
 
 package inventivelink.com.fb2sql;
 
-import android.net.Uri;
-
 import com.google.firebase.annotations.PublicApi;
 import com.google.firebase.database.core.utilities.PushIdGenerator;
 
@@ -25,9 +23,6 @@ public class SQLDatabase {
             return instance;
     }
 
-    public SQLDatabaseReference getReference() {
-        return  new SQLDatabaseReference("");
-    }
 
     public SQLDatabaseReference getReference(String path) {
         return  new SQLDatabaseReference(path);

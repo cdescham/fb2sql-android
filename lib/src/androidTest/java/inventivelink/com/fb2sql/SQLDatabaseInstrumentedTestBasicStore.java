@@ -42,28 +42,28 @@ public class SQLDatabaseInstrumentedTestBasicStore {
         e.setL(200L);
         e.setD(2.0d);
         final String key = SQLDatabase.getInstance().generateKey();
-        SQLDatabase.getInstance().getReference("TEST").child(key).setValue(e).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+        SQLDatabase.getInstance().getReference("TEST").child(key).setValue(e).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+            public void onComplete(@NonNull Task<Void> task) {
                 if (!task.isSuccessful())
                     task.getException().printStackTrace();
                 assertEquals(task.isSuccessful(),true);
                 // R
                 SQLDatabase.getInstance().getReference("TEST").child(key).addListenerForSingleValueEvent(new SQLValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull SQLDatabaseSnapshot var1) {
+                    public void onDataChange(@NonNull SQLDataSnapshot var1) {
                         TestEntity e1 = var1.getValue(TestEntity.class);
                         assertEquals(e,e1);
                         // U
                         e.setS("b");
-                        SQLDatabase.getInstance().getReference("TEST").child(key).setValue(e).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+                        SQLDatabase.getInstance().getReference("TEST").child(key).setValue(e).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
-                            public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+                            public void onComplete(@NonNull Task<Void> task) {
                                 assertEquals(task.isSuccessful(),true);
                                 // D
-                                SQLDatabase.getInstance().getReference("TEST").child(key).setValue(null).addOnCompleteListener(new OnCompleteListener<SQLDatabaseSnapshot>() {
+                                SQLDatabase.getInstance().getReference("TEST").child(key).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
-                                    public void onComplete(@NonNull Task<SQLDatabaseSnapshot> task) {
+                                    public void onComplete(@NonNull Task<Void> task) {
                                         assertEquals(task.isSuccessful(),true);
                                     }
                                 });
@@ -71,7 +71,7 @@ public class SQLDatabaseInstrumentedTestBasicStore {
                         });
                     }
                     @Override
-                    public void onCancelled(@NonNull SQLDatabaseException var1) {
+                    public void onCancelled(@NonNull SQLDatabaseError var1) {
                         assertEquals(true,false);
                     }
                 });

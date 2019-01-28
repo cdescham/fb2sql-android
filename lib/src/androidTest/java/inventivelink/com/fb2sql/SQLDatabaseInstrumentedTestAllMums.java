@@ -15,11 +15,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import fr.heymum.yoomum.bo.Address;
-import fr.heymum.yoomum.bo.Child;
-import fr.heymum.yoomum.bo.Comment;
-import fr.heymum.yoomum.bo.Event;
-import fr.heymum.yoomum.bo.FeedItem;
 import fr.heymum.yoomum.bo.Mum;
 
 import static inventivelink.com.fb2sql.TestCommon.connectSQLDatabase;
@@ -50,9 +45,9 @@ public class SQLDatabaseInstrumentedTestAllMums {
         incTestsCount(1);
         SQLDatabase.getInstance().getReference("mums").addListenerForSingleValueEvent(new SQLValueEventListener() {
             @Override
-            public void onDataChange(@NonNull SQLDatabaseSnapshot s) {
-                Iterable<SQLDatabaseSnapshot> mums = s.getChildren();
-                for (SQLDatabaseSnapshot mum : mums) {
+            public void onDataChange(@NonNull SQLDataSnapshot s) {
+                Iterable<SQLDataSnapshot> mums = s.getChildren();
+                for (SQLDataSnapshot mum : mums) {
                     Mum e = mum.getValue(Mum.class);
                     SQLDatabaseLogger.info(e);
                     assertEquals(false,e == null);
@@ -60,7 +55,7 @@ public class SQLDatabaseInstrumentedTestAllMums {
                 incTestsCount(-1);
             }
             @Override
-            public void onCancelled(@NonNull SQLDatabaseException e) {
+            public void onCancelled(@NonNull SQLDatabaseError e) {
                 SQLDatabaseLogger.error(e);
                 assertEquals(true,false);
             }
