@@ -14,6 +14,7 @@ import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.firebase.annotations.PublicApi;
 import com.google.firebase.database.core.utilities.encoding.CustomClassMapper;
 
@@ -34,6 +35,17 @@ public class SQLDatabaseReference {
         this.table = table;
     }
 
+
+    // Limited to simple query parameters
+    private void addParameter(String key,Object value) {
+        String toAdd = key+"="+value;
+        parameters = parameters != null ? parameters + "&"+toAdd : toAdd;
+    }
+
+    private String getParameters() {
+        return parameters != null ? parameters :"";
+    }
+
     @PublicApi
     public SQLDatabaseReference child(@NonNull String child) {
         if (table == null)
@@ -45,15 +57,6 @@ public class SQLDatabaseReference {
         return  this;
     }
 
-    // Limited to simple query parameters
-    private void addParameter(String key,Object value) {
-        String toAdd = key+"="+value;
-        parameters = parameters != null ? parameters + "&"+toAdd : toAdd;
-    }
-
-    private String getParameters() {
-        return parameters != null ? parameters :"";
-    }
 
     @PublicApi
     public SQLDatabaseReference limitToFirst(Integer limit) {
@@ -108,21 +111,25 @@ public class SQLDatabaseReference {
     }
 
 
+
     @PublicApi
-    public SQLDatabaseReference queryAtLocation(@NonNull Double latitude, @NonNull Double longitude, Double distance, String unit) {
-        geoSearch = "geo_search/"+latitude+"/"+longitude+"/"+distance+unit;
+    public SQLDatabaseReference whereEquals(@NonNull String property,@NonNull String value) {
+        addParameter(property,value);
         return  this;
     }
 
 
+
     @PublicApi
     public Task<Void> setValue(@Nullable Object object) {
+        final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
         if (object == null)
-            return  SQLApiPlatformStore.delete(table,id).getTask();
+            SQLApiPlatformStore.delete(table,id,source);
         else if (id == null)
-            return  SQLApiPlatformStore.insert(table,object).getTask();
+            SQLApiPlatformStore.insert(table,object,source);
         else
-            return  SQLApiPlatformStore.update(table,id,object).getTask();
+            SQLApiPlatformStore.update(table,id,object,source,true);
+        return  source.getTask();
     }
 
     @NonNull
@@ -136,8 +143,9 @@ public class SQLDatabaseReference {
                 update = compound;
             }
             final Map<String, Object> bouncedUpdate = CustomClassMapper.convertToPlainJavaTypes(update);
-            SQLDatabaseLogger.debug(update);
-            return SQLApiPlatformStore.update(table, id, bouncedUpdate).getTask();
+            final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
+            SQLApiPlatformStore.update(table, id, bouncedUpdate,source,false);
+            return source.getTask();
         } catch (Exception e) {
             return new SQLDatabaseError(e).asVoidTask();
         }
@@ -168,6 +176,12 @@ public class SQLDatabaseReference {
     }
 
 
+
+    @PublicApi
+    public SQLDatabaseReference queryAtLocation(@NonNull Double latitude, @NonNull Double longitude, Double distance, String unit) {
+        geoSearch = "geo_search/"+latitude+"/"+longitude+"/"+distance+unit;
+        return  this;
+    }
 
     @PublicApi
     public void addGeoQueryEventListener(@NonNull final SQLGeoQueryEventListener listener) {
