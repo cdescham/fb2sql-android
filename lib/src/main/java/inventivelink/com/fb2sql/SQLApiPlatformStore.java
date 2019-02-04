@@ -9,9 +9,14 @@
 package inventivelink.com.fb2sql;
 
 import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.firebase.database.util.JsonMapper;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
@@ -30,6 +35,34 @@ public class SQLApiPlatformStore {
     private static MediaType mediaTypeLD_JSON = MediaType.parse("application/ld+json");
 
 
+
+    private static MediaType getMediaType() {
+        return mediaTypeLD_JSON;
+    }
+
+    private static String deNormalize(Object object) {
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(object);
+        if (object.getClass().isAssignableFrom(SQLEntityDeNormaliser.class)) {
+            try {
+                List<SQLJSONTransformer> denormalizers = null;
+                Method m = object.getClass().getMethod("getDeNormalizers", null);
+                denormalizers = (List<SQLJSONTransformer>) m.invoke(null, null);
+                if (denormalizers != null) {
+                    for (SQLJSONTransformer normalizer : denormalizers) {
+                        Map<String, Object> json = JsonMapper.parseJson(jsonString);
+                        jsonString = normalizer.transform(json).toString();
+                    }
+                }
+            } catch (Exception e) {
+                SQLDatabaseLogger.warn("Failed retrieving/applying deNormalizers for class, returning untouched. " + object.getClass());
+                e.printStackTrace();
+                return gson.toJson(object);
+            }
+        }
+        return jsonString;
+    }
+
     public static TaskCompletionSource<SQLDataSnapshot> get(String table, String id, String geoSearch, String parameters) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
@@ -46,28 +79,41 @@ public class SQLApiPlatformStore {
 
     public static void insert(String table, Object object,final TaskCompletionSource<Void> source) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
-        Gson gson = new Gson();
+        String json = deNormalize(object);
         String point = endpoint.uriString+"/"+table;
-        SQLDatabaseLogger.debug("[insert request] " + point +" "+gson.toJson(object));
+        SQLDatabaseLogger.debug("[insert request] " + point +" "+json);
         Request request = new Request.Builder()
                 .url(point)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
-                .post(RequestBody.create(mediaTypeLD_JSON,gson.toJson(object)))
+                .post(RequestBody.create(getMediaType(),json))
                 .build();
         enqueueWriteRequestForEndpointAndExpectedReturnCode(source,request,endpoint,201,null);
+    }
+
+    public static void update(String table, final String id, Object object,final TaskCompletionSource<Void> source) {
+        SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
+        String json = deNormalize(object);
+        final String point = endpoint.uriString+"/"+table+"/"+id;
+        SQLDatabaseLogger.debug("[update request] " + point +" "+json);
+        Request request = new Request.Builder()
+                .url(point)
+                .header("X-AUTH-TOKEN", endpoint.authToken)
+                .put(RequestBody.create(getMediaType(),json))
+                .build();
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source,request,endpoint,200,null);
     }
 
 
     public static void update(final String table, final String id, final Object object, final TaskCompletionSource<Void> source, final boolean insertOn404 ) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final String point = endpoint.uriString+"/"+table+"/"+id;
-        Gson gson = new Gson();
+        String json = deNormalize(object);
         Request request = new Request.Builder()
                 .url(point)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
-                .put(RequestBody.create(mediaTypeLD_JSON,gson.toJson(object)))
+                .get()
                 .build();
-        SQLDatabaseLogger.debug("[update request] " + point +" "+gson.toJson(object));
+        SQLDatabaseLogger.debug("[update or insert request] " + point +" "+json);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -76,11 +122,11 @@ public class SQLApiPlatformStore {
             @Override
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
-                    SQLDatabaseLogger.debug("[update response] "+point+" code = " + response.code() );
+                    SQLDatabaseLogger.debug("[get (if exists) response] "+point+" code = " + response.code() );
                     if (response.code() == 404 && insertOn404) {
                         insert(table,object,source);
                     } else if (response.code() == 200) {
-                        source.setResult(null);
+                        update(table,id,object,source);
                     } else {
                         source.setException(new Exception("[update response] "+point+" : "+response.code()));
                     }

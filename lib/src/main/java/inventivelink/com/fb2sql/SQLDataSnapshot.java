@@ -17,7 +17,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class SQLDataSnapshot {
@@ -34,28 +36,26 @@ public class SQLDataSnapshot {
     public <T> T getValue(@NonNull Class<T> valueType) {
         try {
             Map<String, Object> value = JsonMapper.parseJson(jsonString);
+            List<SQLJSONTransformer> normalizers = null;
+            try {
+                Method m = valueType.getMethod("getNormalizers", null);
+                normalizers = (List<SQLJSONTransformer>) m.invoke(null, null);
+            } catch (Exception e) {
+                normalizers = null;
+                SQLDatabaseLogger.info("No normalizers for class" + valueType + ":" + e);
+            }
+            if (normalizers != null) {
+                SQLDatabaseLogger.debug("Normalizers found " + normalizers.size());
+                for (SQLJSONTransformer normalizer : normalizers)
+                    value = normalizer.transform(value);
+            }
             return CustomClassMapper.convertToCustomClass(value, valueType);
-        } catch ( Exception e) {
-            SQLDatabaseLogger.error("Exception in getValue Exception="+e+" json="+jsonString);
+        } catch (Exception e) {
+            SQLDatabaseLogger.error("Exception in getValue Exception=" + e + " json=" + jsonString);
             e.printStackTrace();
-            return  null;
+            return null;
         }
     }
-
-    @PublicApi
-    public <T> T getValueWithNormalizer(@NonNull Class<T> valueType,@NonNull SQLNormalizer normalizer) {
-        try {
-            Map<String, Object> value = JsonMapper.parseJson(jsonString);
-            value = normalizer.normalize(value);
-            return CustomClassMapper.convertToCustomClass(value, valueType);
-        } catch ( Exception e) {
-            SQLDatabaseLogger.error("Exception in getValue Exception="+e+" json="+jsonString);
-            e.printStackTrace();
-            return  null;
-        }
-    }
-
-
 
     @PublicApi
     public String getKey() {
@@ -63,7 +63,7 @@ public class SQLDataSnapshot {
     }
 
     @PublicApi
-    public Iterable<SQLDataSnapshot> getChildren()  {
+    public Iterable<SQLDataSnapshot> getChildren() {
         JsonElement jelement = new JsonParser().parse(jsonString);
         JsonObject jobject = jelement.getAsJsonObject();
         final JsonArray children = jobject.getAsJsonArray("hydra:member");
@@ -76,11 +76,13 @@ public class SQLDataSnapshot {
                     public boolean hasNext() {
                         return c.hasNext();
                     }
+
                     @Override
                     @NonNull
                     public SQLDataSnapshot next() {
-                        return new SQLDataSnapshot( c.next().toString(),null);
+                        return new SQLDataSnapshot(c.next().toString(), null);
                     }
+
                     @Override
                     public void remove() {
                         throw new UnsupportedOperationException("remove called on immutable collection");
@@ -91,7 +93,7 @@ public class SQLDataSnapshot {
     }
 
     @PublicApi
-    public Long childrenCount()  {
+    public Long childrenCount() {
         JsonElement jelement = new JsonParser().parse(jsonString);
         JsonObject jobject = jelement.getAsJsonObject();
         final JsonArray children = jobject.getAsJsonArray("hydra:member");

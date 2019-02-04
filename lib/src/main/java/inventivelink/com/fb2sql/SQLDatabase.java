@@ -14,7 +14,7 @@ public class SQLDatabase {
 
     private static SQLDatabase instance = null;
     private SQLDatabaseEndpoint endPoint;
-
+    public boolean kotlinEnabled =false;
 
     public static synchronized SQLDatabase getInstance() {
         if (instance == null)
@@ -101,6 +101,12 @@ public class SQLDatabase {
     @PublicApi
     public SQLDatabase setLogVerbosity(int verbosity) {
         SQLDatabaseLogger.verbosity = verbosity;
+        return this;
+    }
+
+    @PublicApi
+    public SQLDatabase enableKotlin(boolean enable) {
+        this.kotlinEnabled = enable;
         return this;
     }
 
