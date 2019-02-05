@@ -40,4 +40,9 @@ public class SQLDatabaseLogger {
             Log.i(SQLDATABASE_TAG,o != null ? o.toString() : null);
     }
 
+        public static void abort(Object o) {
+            SQLDatabaseHelper.dumpStackTrace("abort");
+            throw new RuntimeException(o.toString());
+    }
+
 }

@@ -42,10 +42,10 @@ public class SQLDataSnapshot {
                 normalizers = (List<SQLJSONTransformer>) m.invoke(null, null);
             } catch (Exception e) {
                 normalizers = null;
-                SQLDatabaseLogger.info("No normalizers for class" + valueType + ":" + e);
+                SQLDatabaseLogger.info("No normalizers for " + valueType + ":" + e);
             }
             if (normalizers != null) {
-                SQLDatabaseLogger.debug("Normalizers found " + normalizers.size());
+                SQLDatabaseLogger.debug("Normalizers found for  " + valueType+" "+normalizers.size());
                 for (SQLJSONTransformer normalizer : normalizers)
                     value = normalizer.transform(value);
             }
