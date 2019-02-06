@@ -47,3 +47,11 @@ curl -X GET "http://192.168.1.99:8000/api/mums/9HWOdSP1h4X7HgR6axZwG73AIQ83" -H 
 curl -X POST "http://127.0.0.1:8000/api/mums" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{ \"mumId\": \"1234\", \"location\": { \"latitude\": 0, \"longitude\": 0 }}" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 curl -X PUT "http://127.0.0.1:8000/api/mums/1234" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{\"location\":{\"latitude\":43.7111452,\"l\":[],\"longitude\":7.1351481}}" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 
+curl -X POST "http://127.0.0.1:8000/api/locations" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d  {"deactivated":false,"description":"djjejsk\nbonjour Madame j\u0027ai reçu\n","latitude":44.837789,"location":"Bordeaux, France","longitude":-0.57918,"name":"Bordeaux","placeID":"ChIJgcpR9-gnVQ0RiXo5ewOGY3k","timestampAsDate":"Jan 1, 1970 01:00:00","type":"health","userId":"9HWOdSP1h4X7HgR6axZwG73AIQ83"} -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
+curl -X POST "http://127.0.0.1:8000/api/locations" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{\"deactivated\":false,\"description\":\"desc\",\"latitude\":44.837789,\"location\":\"Bordeaux, France\",\"longitude\":-0.57918,\"name\":\"Bordeaux\",\"placeID\":\"ChIJgcpR9-gnVQ0RiXo5ewOGY3k\",\"timestampAsDate\":\"Jan 1, 1970 01:00:00\",\"type\":\"health\",\"userId\":\"9HWOdSP1h4X7HgR6axZwG73AIQ83\"}" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
+
+
+curl -X POST "http://127.0.0.1:8000/api/locations" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{\"deactivated\":false,\"description\":\"desc\",\"latitude\":44.837789,\"location\":\"Bordeaux, France\",\"longitude\":-0.57918,\"name\":\"Bordeaux\",\"placeID\":\"ChIJgcpR9-gnVQ0RiXo5ewOGY3k\",\"timestampAsDate\":\"Jan 1, 1970 01:00:00\",\"type\":\"health\",\"mum\":\"/api/mums/9HWOdSP1h4X7HgR6axZwG73AIQ83\",\"locationId\":\"123\"}" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+

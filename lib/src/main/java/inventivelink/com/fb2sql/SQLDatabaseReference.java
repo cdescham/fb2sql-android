@@ -142,22 +142,33 @@ public class SQLDatabaseReference {
             return hash;
     }
 
+    private static Map<String, Object>  deNormalize(Map<String, Object> hash, @NonNull List<SQLJSONTransformer> denormalizers) throws Exception {
+        for (SQLJSONTransformer denormalizer : denormalizers) {
+            hash = denormalizer.transform(hash);
+        }
+        return hash;
+    }
 
     @PublicApi
     public Task<Void> setValue(@Nullable Object object) throws Exception {
-        List<SQLJSONTransformer> deNormalizers = getDenormalizerForClass(object.getClass());
-        String json = new Gson().toJson(object);
-        if (deNormalizers != null ) {
-            Map<String, Object> bouncedUpdate = CustomClassMapper.convertToPlainJavaTypes(JsonMapper.parseJson(json));
-            json = new Gson().toJson(bouncedUpdate);
-        }
         final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
-        if (object == null)
-            SQLApiPlatformStore.delete(table, id, source);
-        else if (id == null)
-            SQLApiPlatformStore.insert(table, json, source);
-        else
-            SQLApiPlatformStore.update(table, id, json, source, true);
+        if (object != null) {
+            List<SQLJSONTransformer> deNormalizers = getDenormalizerForClass(object.getClass());
+            String json = new Gson().toJson(object);
+            Map<String, Object> bouncedUpdate = CustomClassMapper.convertToPlainJavaTypes(JsonMapper.parseJson(json));
+            bouncedUpdate.put(table.substring(0, table.length() - 1)+"Id",id);
+            if (deNormalizers != null) {
+                bouncedUpdate = deNormalize(bouncedUpdate, deNormalizers);
+                json = new Gson().toJson(bouncedUpdate);
+            }
+            if (table == null || id == null)
+                throw new RuntimeException("Attempting to set value on unknown node. Make sure to call child(<table>).child(<key>)");
+                //SQLApiPlatformStore.insert(table, json, source);
+            else
+                SQLApiPlatformStore.update(table, id, json, source, true);
+        } else {
+                SQLApiPlatformStore.delete(table, id, source);
+        }
         return source.getTask();
     }
 
