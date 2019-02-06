@@ -19,7 +19,6 @@ public class SQLJSONListToHashTransformer implements SQLJSONTransformer {
         for (HashMap e : list) {
             hash.put((String)e.get(key),e);
         }
-        input.remove(list);
         input.put(property,hash);
         return input;
     }

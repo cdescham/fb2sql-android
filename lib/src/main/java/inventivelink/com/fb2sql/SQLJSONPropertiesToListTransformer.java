@@ -17,7 +17,7 @@ public class SQLJSONPropertiesToListTransformer implements SQLJSONTransformer {
         for (String property : propertyNames) {
             Object o = input.get(property);
             grouped.add(o);
-            input.remove(o);
+            input.remove(property);
         }
         input.put(key,grouped);
         return input;

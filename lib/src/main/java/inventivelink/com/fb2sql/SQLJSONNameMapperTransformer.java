@@ -12,7 +12,9 @@ public class SQLJSONNameMapperTransformer implements SQLJSONTransformer {
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {
-        input.put(newName, input.remove(property));
+        Object o = input.get(property);
+        input.put(newName, o);
+        input.remove(property);
         return input;
     }
 

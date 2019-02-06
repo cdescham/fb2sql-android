@@ -22,7 +22,6 @@ public class SQLJSONHashToListTransformer implements SQLJSONTransformer {
             theObj.put(key, k);
             result.add(theObj);
         }
-        input.remove(elems);
         input.put(property, result);
         return input;
     }

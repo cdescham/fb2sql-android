@@ -19,7 +19,7 @@ public class SQLJSONListToPropertiesTransformer implements SQLJSONTransformer {
             for (String property : propertyNames) {
                 input.put(property, list.get(i++));
             }
-            input.remove(input.get(key));
+            input.remove(key);
         } catch (Exception e) {
             SQLDatabaseLogger.error("Error in denormalizer SQLJSONListToPropertiesTransformer "+e);
             e.printStackTrace();

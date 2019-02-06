@@ -55,3 +55,6 @@ curl -X POST "http://127.0.0.1:8000/api/locations" -H "accept: application/ld+js
 
 curl -X POST "http://127.0.0.1:8000/api/locations" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{\"deactivated\":false,\"description\":\"desc\",\"latitude\":44.837789,\"location\":\"Bordeaux, France\",\"longitude\":-0.57918,\"name\":\"Bordeaux\",\"placeID\":\"ChIJgcpR9-gnVQ0RiXo5ewOGY3k\",\"timestampAsDate\":\"Jan 1, 1970 01:00:00\",\"type\":\"health\",\"mum\":\"/api/mums/9HWOdSP1h4X7HgR6axZwG73AIQ83\",\"locationId\":\"123\"}" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 
+
+curl -X GET http://192.168.1.99:8000/api/mum_locations/geo_search/43.7111426/7.1351555/50.0km? -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
