@@ -15,20 +15,15 @@ public class SQLJSONHashToListTransformer implements SQLJSONTransformer {
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {
-        for (String key : input.keySet()) {
-            if (key.equals(property)) {
-                List<Object> result = new ArrayList<>();
-                HashMap<String, Object> elems = (HashMap<String, Object>) input.get(key);
-                for (String k : elems.keySet()) {
-                    HashMap<String, Object> theObj = (HashMap<String, Object>) elems.get(k);
-                    theObj.put(key, k);
-                    result.add(theObj);
-                }
-                input.remove(elems);
-                input.put(property, result);
-                break;
-            }
+        List<Object> result = new ArrayList<>();
+        HashMap<String, Object> elems = (HashMap<String, Object>) input.get(property);
+        for (String k : elems.keySet()) {
+            HashMap<String, Object> theObj = (HashMap<String, Object>) elems.get(k);
+            theObj.put(key, k);
+            result.add(theObj);
         }
+        input.remove(elems);
+        input.put(property, result);
         return input;
     }
 

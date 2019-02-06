@@ -14,18 +14,13 @@ public class SQLJSONListToHashTransformer implements SQLJSONTransformer {
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {
-        for (String key : input.keySet()) {
-            if (key.equals(property)) {
-                HashMap<String,Object> result = new HashMap<>();
-                List<HashMap<String, Object>> o = (List<HashMap<String, Object>>) input.get(key);
-                for (HashMap e : o) {
-                    result.put((String)e.get(key),e);
-                }
-                input.remove(o);
-                input.put(property,result);
-                break;
-            }
+        HashMap<String,Object> hash = new HashMap<>();
+        List<HashMap<String, Object>> list = (List<HashMap<String, Object>>) input.get(property);
+        for (HashMap e : list) {
+            hash.put((String)e.get(key),e);
         }
+        input.remove(list);
+        input.put(property,hash);
         return input;
     }
 

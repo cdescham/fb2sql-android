@@ -23,6 +23,11 @@ TODO CD :
 virer dumpStackTrace et les cdes, 
 flag migrated
 firebase active
+check the continueWith logic https://developers.google.com/android/reference/com/google/android/gms/tasks/Continuation
+
+
+
+
 curl -X GET -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE" "http://127.0.0.1:8000/api/feed_likes?feed=-LX4-dHvnrjToNRnEuOR&mum=Hdr6l2EqmWgi3kKr1nSMiQJiHKn1" -H "accept: application/ld+json"
 clean the helper
 
@@ -36,8 +41,6 @@ curl -X POST "http://192.168.1.99:8000/api/mums" -H "accept: application/ld+json
 curl -X PUT "http://192.168.1.99:8000/api/mums/1234" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{\"location\":{\"latitude\":43.7111452,\"l\":[],\"longitude\":7.1351481}}" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 
 curl -X GET "http://192.168.1.99:8000/api/mums/9HWOdSP1h4X7HgR6axZwG73AIQ83" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" 
-
-
 
 
 
