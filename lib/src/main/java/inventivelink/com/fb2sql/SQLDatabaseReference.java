@@ -162,8 +162,7 @@ public class SQLDatabaseReference {
                 json = new Gson().toJson(bouncedUpdate);
             }
             if (table == null || id == null)
-                throw new RuntimeException("Attempting to set value on unknown node. Make sure to call child(<table>).child(<key>)");
-                //SQLApiPlatformStore.insert(table, json, source);
+                throw new RuntimeException("Attempting to set value on unknown node. Make sure to call getReference(<table>).child(<primary key>)");
             else
                 SQLApiPlatformStore.update(table, id, json, source, true);
         } else {

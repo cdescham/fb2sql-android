@@ -38,7 +38,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .get()
                 .build();
-        enqueueReadRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200, id);
+        enqueueReadRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200, id, table);
         return source;
     }
 
@@ -133,7 +133,7 @@ public class SQLApiPlatformStore {
         return builder.build();
     }
 
-    private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id) {
+    private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -146,7 +146,7 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("[get response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
-                        source.setResult(new SQLDataSnapshot(responseString, id));
+                        source.setResult(new SQLDataSnapshot(responseString, table));
                     } else {
                         source.setException(new Exception("get response : " + response.code()));
                     }

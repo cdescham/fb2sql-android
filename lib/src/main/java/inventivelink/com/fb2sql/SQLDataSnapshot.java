@@ -24,12 +24,13 @@ import java.util.Map;
 
 public class SQLDataSnapshot {
     private String jsonString;
+    private String table;
     private String key;
 
 
-    public SQLDataSnapshot(String jsonString, String key) {
+    public SQLDataSnapshot(String jsonString,String table) {
         this.jsonString = jsonString;
-        this.key = key;
+        this.table = table;
     }
 
     @PublicApi
@@ -49,6 +50,7 @@ public class SQLDataSnapshot {
                 for (SQLJSONTransformer normalizer : normalizers)
                     value = normalizer.transform(value);
             }
+            key = (String) value.get(table.substring(0, table.length() - 1)+"Id");
             return CustomClassMapper.convertToCustomClass(value, valueType);
         } catch (Exception e) {
             SQLDatabaseLogger.error("Exception in getValue Exception=" + e + " json=" + jsonString);
@@ -65,7 +67,7 @@ public class SQLDataSnapshot {
     @PublicApi
     public Iterable<SQLDataSnapshot> getChildren() {
         JsonElement jelement = new JsonParser().parse(jsonString);
-        JsonObject jobject = jelement.getAsJsonObject();
+        final JsonObject jobject = jelement.getAsJsonObject();
         final JsonArray children = jobject.getAsJsonArray("hydra:member");
         return new Iterable<SQLDataSnapshot>() {
             @Override
@@ -80,7 +82,7 @@ public class SQLDataSnapshot {
                     @Override
                     @NonNull
                     public SQLDataSnapshot next() {
-                        return new SQLDataSnapshot(c.next().toString(), null);
+                        return new SQLDataSnapshot(c.next().toString(), table);
                     }
 
                     @Override
