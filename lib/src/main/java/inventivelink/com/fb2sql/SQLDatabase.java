@@ -24,8 +24,8 @@ public class SQLDatabase {
     }
 
 
-    public SQLDatabaseReference getReference(String path) {
-        return  new SQLDatabaseReference(path);
+    public SQLDatabaseReference getReference(String tableName) {
+        return  new SQLDatabaseReference(tableName);
     }
 
 

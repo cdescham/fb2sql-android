@@ -49,11 +49,11 @@ public class SQLDatabaseReference {
     }
 
     @PublicApi
-    public SQLDatabaseReference child(@NonNull String child) {
+    public SQLDatabaseReference child(String nullablePk) {
         if (table == null)
-            table = child;
-        else if (id == null)
-            id = child;
+            SQLDatabaseLogger.abort("getReference(<Table>) must be called prior to calling child().");
+        if (id == null)
+            id = nullablePk;
         else
             SQLDatabaseLogger.abort("Child call too many times. Maximum time is 2, child(<table>).child(<primary key>)");
         return this;
@@ -61,9 +61,11 @@ public class SQLDatabaseReference {
 
 
     @PublicApi
-    public SQLDatabaseReference child(@NonNull Long autoIncrementPk) {
+    public SQLDatabaseReference child(Long nullableAutoIncrementPk) {
+        if (table == null)
+            SQLDatabaseLogger.abort("getReference(<Table>) must be called prior to calling child().");
         if (id == null)
-            id = autoIncrementPk.toString();
+            id = nullableAutoIncrementPk != null ? nullableAutoIncrementPk.toString() : null;
         else
             SQLDatabaseLogger.abort("Child call too many times. Maximum time is 2, child(<table>).child(<primary key>)");
         return this;
@@ -165,7 +167,9 @@ public class SQLDatabaseReference {
             List<SQLJSONTransformer> deNormalizers = getDenormalizerForClass(object.getClass());
             String json = new Gson().toJson(object);
             Map<String, Object> bouncedUpdate = CustomClassMapper.convertToPlainJavaTypes(JsonMapper.parseJson(json));
-            bouncedUpdate.put(table.substring(0, table.length() - 1)+"Id",id);
+            String pkName = table.substring(0, table.length() - 1)+"Id";
+            if (bouncedUpdate.get(pkName) == null)
+                 bouncedUpdate.put(pkName,id);
             if (deNormalizers != null) {
                 bouncedUpdate = deNormalize(bouncedUpdate, deNormalizers);
                 json = new Gson().toJson(bouncedUpdate);
@@ -214,7 +218,6 @@ public class SQLDatabaseReference {
             if (deNormalizers != null)
                 bouncedUpdate = deNormalize(bouncedUpdate,deNormalizers,property);
             String json = new Gson().toJson(bouncedUpdate);
-            SQLDatabaseLogger.debug("[updateProperty] original object = "+object+" json denormalized map = "+json);
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
             SQLApiPlatformStore.update(table, id, json, source, false);
             return source.getTask();
