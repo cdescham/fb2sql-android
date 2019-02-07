@@ -61,6 +61,15 @@ public class SQLDatabaseReference {
 
 
     @PublicApi
+    public SQLDatabaseReference child(@NonNull Long autoIncrementPk) {
+        if (id == null)
+            id = autoIncrementPk.toString();
+        else
+            SQLDatabaseLogger.abort("Child call too many times. Maximum time is 2, child(<table>).child(<primary key>)");
+        return this;
+    }
+
+    @PublicApi
     public SQLDatabaseReference limitToFirst(Integer limit) {
         addParameter("itemsPerPage", limit);
         return this;
@@ -161,8 +170,8 @@ public class SQLDatabaseReference {
                 bouncedUpdate = deNormalize(bouncedUpdate, deNormalizers);
                 json = new Gson().toJson(bouncedUpdate);
             }
-            if (table == null || id == null)
-                throw new RuntimeException("Attempting to set value on unknown node. Make sure to call getReference(<table>).child(<primary key>)");
+            if (id == null)
+                SQLApiPlatformStore.insert(table, json, source);
             else
                 SQLApiPlatformStore.update(table, id, json, source, true);
         } else {
