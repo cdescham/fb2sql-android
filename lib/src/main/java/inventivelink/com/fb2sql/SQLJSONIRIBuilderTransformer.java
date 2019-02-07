@@ -7,9 +7,9 @@ public class SQLJSONIRIBuilderTransformer implements SQLJSONTransformer {
     String id;
 
 
-    public SQLJSONIRIBuilderTransformer(String property, String copyFromId) {
+    public SQLJSONIRIBuilderTransformer(String property, String buildFromId) {
         this.property = property;
-        this.id = copyFromId;
+        this.id = buildFromId;
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {

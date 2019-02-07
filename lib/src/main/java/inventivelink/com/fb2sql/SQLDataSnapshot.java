@@ -37,13 +37,14 @@ public class SQLDataSnapshot {
     public <T> T getValue(@NonNull Class<T> valueType) {
         try {
             Map<String, Object> value = JsonMapper.parseJson(jsonString);
+            value = (new SQLJSONCommonNormalizer()).transform(value);
             List<SQLJSONTransformer> normalizers = null;
             try {
                 Method m = valueType.getMethod("getNormalizers", null);
                 normalizers = (List<SQLJSONTransformer>) m.invoke(null, null);
             } catch (Exception e) {
                 normalizers = null;
-                SQLDatabaseLogger.info("No normalizers for " + valueType + ":" + e);
+                SQLDatabaseLogger.info("No normalizers for " + valueType);
             }
             if (normalizers != null) {
                 SQLDatabaseLogger.debug("Normalizers found for  " + valueType+" "+normalizers.size());

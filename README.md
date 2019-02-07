@@ -24,7 +24,7 @@ virer dumpStackTrace et les cdes,
 flag migrated
 firebase active
 check the continueWith logic https://developers.google.com/android/reference/com/google/android/gms/tasks/Continuation
-
+rename to doulbeWrite
 
 
 
@@ -57,4 +57,17 @@ curl -X POST "http://127.0.0.1:8000/api/locations" -H "accept: application/ld+js
 
 
 curl -X GET http://192.168.1.99:8000/api/mum_locations/geo_search/43.7111426/7.1351555/50.0km? -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
+curl -X POST "http://127.0.0.1:8000/api/events" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{ \"mum\": \"/api/mums/9HWOdSP1h4X7HgR6axZwG73AIQ83\", \"endDate\": 571242562, \"eventId\": \"-LY7MENeIgGjAT2k8N1A\"}" "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+curl -X POST "http://127.0.0.1:8000/api/events" -H "accept: application/ld+json" -H "Content-Type: application/ld+json" -d "{ \"mum\": \"/api/mums/9HWOdSP1h4X7HgR6axZwG73AIQ83\", \"endDate\": 571242562, \"eventId\": \"-LY7MENeIgGjAT2k8N1A\"}"  -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
+curl -X GET  http://192.168.1.99:8000/api/locations_locations/geo_search/43.71114522745989/7.135148048400879/40km?type=preparation -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+curl -X GET  http://192.168.1.99:8000/api/locations_locations/geo_search/43.6597689/7.2148214/40km -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
+j'ai un petit pb avec geoseach sur locations_locations, il me retourne rien sur le petit test suivant :  
+1/ insert into locations_locations (location_id,latitude,longitude,type) values (1,43.6597689,7.2148214,'health'); 
+2/ bin/console fos:elastica:populate
+3/ curl -X GET  http://127.0.0.1:8000/api/locations_locations/geo_search/43.6597689/7.2148214/40km -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+
+
 

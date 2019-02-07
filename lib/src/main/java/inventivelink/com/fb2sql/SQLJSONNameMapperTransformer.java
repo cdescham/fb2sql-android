@@ -6,8 +6,8 @@ public class SQLJSONNameMapperTransformer implements SQLJSONTransformer {
     String property;
     String newName;
 
-    public SQLJSONNameMapperTransformer(String property, String newName) {
-        this.property = property;
+    public SQLJSONNameMapperTransformer(String oldname, String newName) {
+        this.property = oldname;
         this.newName = newName;
     }
 
