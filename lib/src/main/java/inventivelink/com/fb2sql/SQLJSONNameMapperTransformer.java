@@ -6,9 +6,9 @@ public class SQLJSONNameMapperTransformer implements SQLJSONTransformer {
     String property;
     String newName;
 
-    public SQLJSONNameMapperTransformer(String oldname, String newName) {
-        this.property = oldname;
-        this.newName = newName;
+    public SQLJSONNameMapperTransformer(String jsonName, String entityName) {
+        this.property = jsonName;
+        this.newName = entityName;
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {

@@ -69,5 +69,6 @@ j'ai un petit pb avec geoseach sur locations_locations, il me retourne rien sur 
 2/ bin/console fos:elastica:populate
 3/ curl -X GET  http://127.0.0.1:8000/api/locations_locations/geo_search/43.6597689/7.2148214/40km -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 
+curl -X GET "http://127.0.0.1:8000/api/mums?yooMumAccount=true" -H "accept: application/ld+json" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 
 

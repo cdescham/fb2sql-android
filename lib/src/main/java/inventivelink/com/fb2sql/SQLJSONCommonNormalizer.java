@@ -17,6 +17,9 @@ public class SQLJSONCommonNormalizer implements SQLJSONTransformer {
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {
+        if (input.get("id") == null) {
+            input.put("id",input.get("@id"));
+        }
         input.remove("@id");
         input.remove("@type");
         input.remove("@context");

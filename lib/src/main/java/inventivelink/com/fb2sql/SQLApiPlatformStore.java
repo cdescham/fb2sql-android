@@ -25,10 +25,18 @@ import okhttp3.Route;
 
 public class SQLApiPlatformStore {
 
+
     private static MediaType mediaType = MediaType.parse("application/ld+json");
 
+    private static Long seqNum = 0L;
 
-        public static TaskCompletionSource<SQLDataSnapshot> get(String table, String id, String geoSearch, String parameters) {
+
+    private static synchronized Long getSeqNum() {
+        return seqNum++;
+    }
+
+
+    public static TaskCompletionSource<SQLDataSnapshot> get(String table, String id, String geoSearch, String parameters) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString + "/" + table + (id != null ? "/" + id : (geoSearch != null ? "/" + geoSearch : "") + "?" + parameters);
@@ -42,10 +50,9 @@ public class SQLApiPlatformStore {
         return source;
     }
 
-    public static void insert(String table, String json , final TaskCompletionSource<Void> source) {
+    public static void insert(String table, String json, final TaskCompletionSource<Void> source) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         String point = endpoint.uriString + "/" + table;
-        SQLDatabaseLogger.debug("[insert request] " + point + " " + json);
         Request request = new Request.Builder()
                 .url(point)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
@@ -54,10 +61,9 @@ public class SQLApiPlatformStore {
         enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201, null);
     }
 
-    public static void update(String table, final String id, String json , final TaskCompletionSource<Void> source) {
+    public static void update(String table, final String id, String json, final TaskCompletionSource<Void> source) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final String point = endpoint.uriString + "/" + table + "/" + id;
-        SQLDatabaseLogger.debug("[update request] " + point + " " + json);
         Request request = new Request.Builder()
                 .url(point)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
@@ -67,7 +73,7 @@ public class SQLApiPlatformStore {
     }
 
 
-    public static void update(final String table, final String id, final String json , final TaskCompletionSource<Void> source, final boolean insertOn404) {
+    public static void update(final String table, final String id, final String json, final TaskCompletionSource<Void> source, final boolean insertOn404) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final String point = endpoint.uriString + "/" + table + "/" + id;
         Request request = new Request.Builder()
@@ -75,7 +81,8 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .get()
                 .build();
-        SQLDatabaseLogger.debug("[update or insert request] " + point + " " + json);
+        final Long seq  = getSeqNum();
+        SQLDatabaseLogger.debug("["+seq+"][get4update request] " + point + " " + json);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -85,16 +92,16 @@ public class SQLApiPlatformStore {
             @Override
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
-                    SQLDatabaseLogger.debug("[get (if exists) response] " + point + " code = " + response.code());
+                    SQLDatabaseLogger.debug("["+seq+"][get4update response] " + point + " code = " + response.code());
                     if (response.code() == 404 && insertOn404) {
                         insert(table, json, source);
                     } else if (response.code() == 200) {
                         update(table, id, json, source);
                     } else {
-                        source.setException(new Exception("[update response] " + point + " : " + response.code()));
+                        source.setException(new Exception("["+seq+"][get4update response] " + point + " : " + response.code()));
                     }
                 } catch (Exception e) {
-                    SQLDatabaseLogger.error("[update response] exception = " + e + ":" + point);
+                    SQLDatabaseLogger.error("["+seq+"][get4update response] exception = " + e + ":" + point);
                     e.printStackTrace();
                     source.setException(e);
                 }
@@ -106,7 +113,6 @@ public class SQLApiPlatformStore {
     public static void delete(String table, String id, final TaskCompletionSource<Void> source) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         String point = endpoint.uriString + "/" + table + "/" + id;
-        SQLDatabaseLogger.debug("[delete request] " + point);
         Request request = new Request.Builder()
                 .url(endpoint.uriString + "/" + table + "/" + id)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
@@ -134,6 +140,8 @@ public class SQLApiPlatformStore {
     }
 
     private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
+        final Long seq = getSeqNum();
+        SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -144,14 +152,14 @@ public class SQLApiPlatformStore {
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
                     String responseString = response.body().string();
-                    SQLDatabaseLogger.debug("[get response] " + request + " code = " + response.code() + " " + responseString);
+                    SQLDatabaseLogger.debug("["+seq+"][read response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
                         source.setResult(new SQLDataSnapshot(responseString, table));
                     } else {
                         source.setException(new Exception("get response : " + response.code()));
                     }
                 } catch (Exception e) {
-                    SQLDatabaseLogger.error("[get response] exception = " + e);
+                    SQLDatabaseLogger.error("["+seq+"][read response] exception = " + e);
                     e.printStackTrace();
                     source.setException(e);
                 }
@@ -160,6 +168,8 @@ public class SQLApiPlatformStore {
     }
 
     private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id) {
+        final Long seq = getSeqNum();
+        SQLDatabaseLogger.debug("["+seq+"][write request] " + request+ ":"+request.body());
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -170,14 +180,14 @@ public class SQLApiPlatformStore {
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
                     String responseString = response.body().string();
-                    SQLDatabaseLogger.debug("[write response] " + request + " code = " + response.code() + " " + responseString);
+                    SQLDatabaseLogger.debug("["+seq+"][write response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
                         source.setResult(null);
                     } else {
                         source.setException(new Exception("write response : " + response.code()));
                     }
                 } catch (Exception e) {
-                    SQLDatabaseLogger.error("[write response] exception = " + e);
+                    SQLDatabaseLogger.error("["+seq+"][write response] exception = " + e);
                     e.printStackTrace();
                     source.setException(e);
                 }
