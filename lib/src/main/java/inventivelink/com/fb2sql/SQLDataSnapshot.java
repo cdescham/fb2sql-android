@@ -35,9 +35,9 @@ public class SQLDataSnapshot {
 
     @PublicApi
     public <T> T getValue(@NonNull Class<T> valueType) {
+        Map<String, Object> value = null;
         try {
-            Map<String, Object> value = JsonMapper.parseJson(jsonString);
-            value = (new SQLJSONCommonNormalizer()).transform(value);
+            value = (new SQLJSONCommonNormalizer()).transform(JsonMapper.parseJson(jsonString));
             List<SQLJSONTransformer> normalizers = null;
             try {
                 Method m = valueType.getMethod("getNormalizers", null);
@@ -54,7 +54,7 @@ public class SQLDataSnapshot {
             key = (String) value.get(table.substring(0, table.length() - 1)+"Id");
             return CustomClassMapper.convertToCustomClass(value, valueType);
         } catch (Exception e) {
-            SQLDatabaseLogger.error("Exception in getValue Exception=" + e + " json=" + jsonString);
+            SQLDatabaseLogger.error("Exception in getValue Exception=" + e + " json=" + value);
             e.printStackTrace();
             return null;
         }

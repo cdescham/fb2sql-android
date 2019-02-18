@@ -9,7 +9,7 @@ import java.util.Map;
 public class SQLJSONCommonNormalizer implements SQLJSONTransformer {
 
 
-    private String getIdFromIri(String IRI) {
+    public static String getIdFromIri(String IRI) {
         return Uri.parse((String)IRI).getLastPathSegment();
     }
 

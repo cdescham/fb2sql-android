@@ -40,7 +40,6 @@ public class SQLApiPlatformStore {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final TaskCompletionSource<SQLDataSnapshot> source = new TaskCompletionSource<>();
         String point = endpoint.uriString + "/" + table + (id != null ? "/" + id : (geoSearch != null ? "/" + geoSearch : "") + "?" + parameters);
-        SQLDatabaseLogger.debug("[get request] " + point);
         Request request = new Request.Builder()
                 .url(point)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
@@ -58,7 +57,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .post(RequestBody.create(mediaType, json))
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201, null);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201);
     }
 
     public static void update(String table, final String id, String json, final TaskCompletionSource<Void> source) {
@@ -69,7 +68,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .put(RequestBody.create(mediaType, json))
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200, null);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200);
     }
 
 
@@ -118,7 +117,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .delete()
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 204, id);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 204);
         SQLDatabaseLogger.debug("DELETE:" + point);
     }
 
@@ -156,7 +155,7 @@ public class SQLApiPlatformStore {
                     if (response.code() == successReturnCode) {
                         source.setResult(new SQLDataSnapshot(responseString, table));
                     } else {
-                        source.setException(new Exception("get response : " + response.code()));
+                        source.setException(new Exception("read response : " + response.code()));
                     }
                 } catch (Exception e) {
                     SQLDatabaseLogger.error("["+seq+"][read response] exception = " + e);
@@ -167,7 +166,7 @@ public class SQLApiPlatformStore {
         });
     }
 
-    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id) {
+    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode) {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][write request] " + request+ ":"+request.body());
         getClient(endpoint).newCall(request).enqueue(new Callback() {
