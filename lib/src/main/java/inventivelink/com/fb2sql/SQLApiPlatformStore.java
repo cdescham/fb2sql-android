@@ -79,10 +79,10 @@ public class SQLApiPlatformStore {
         Request request = new Request.Builder()
                 .url(point)
                 .header("X-AUTH-TOKEN", endpoint.authToken)
-                .get()
+                .put(RequestBody.create(mediaType, json))
                 .build();
         final Long seq  = getSeqNum();
-        SQLDatabaseLogger.debug("["+seq+"][get4update request] " + point + " " + json);
+        SQLDatabaseLogger.debug("["+seq+"][update request] " + point + " " + json);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
@@ -92,13 +92,13 @@ public class SQLApiPlatformStore {
             @Override
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
-                    SQLDatabaseLogger.debug("["+seq+"][get4update response] " + point + " code = " + response.code());
+                    SQLDatabaseLogger.debug("["+seq+"][update response] " + point + " code = " + response.code());
                     if (response.code() == 404 && insertOn404) {
                         insert(table, json, source);
                     } else if (response.code() == 200) {
-                        update(table, id, json, source);
+                        source.setResult(null);
                     } else {
-                        source.setException(new Exception("["+seq+"][get4update response] " + point + " : " + response.code()));
+                        source.setException(new Exception("["+seq+"][update response] " + point + " : " + response.code()));
                     }
                 } catch (Exception e) {
                     SQLDatabaseLogger.error("["+seq+"][get4update response] exception = " + e + ":" + point);
