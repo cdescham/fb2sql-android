@@ -16,6 +16,8 @@ public class SQLDatabaseEndpoint {
     public static int connectionTimeout = 10;
     public static int readTimeout = 30;
     public static int writeTimeout = 30;
+    public static int connectionPoolMaxIdleConnections = 20;
+    public static int connectionPoolKeepAliveDuration = 60;
 
     public SQLDatabaseEndpoint() {
     }

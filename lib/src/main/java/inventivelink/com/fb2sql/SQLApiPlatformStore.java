@@ -125,7 +125,7 @@ public class SQLApiPlatformStore {
 
     private static OkHttpClient okHttpClient = null;
 
-    private static OkHttpClient getClient(final SQLDatabaseEndpoint endpoint) {
+    private static synchronized OkHttpClient getClient(final SQLDatabaseEndpoint endpoint) {
         if (okHttpClient == null) {
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
             builder.authenticator(new Authenticator() {
@@ -138,7 +138,7 @@ public class SQLApiPlatformStore {
             builder.connectTimeout(endpoint.connectionTimeout, TimeUnit.SECONDS);
             builder.writeTimeout(endpoint.writeTimeout, TimeUnit.SECONDS);
             builder.readTimeout(endpoint.readTimeout, TimeUnit.SECONDS);
-            builder.connectionPool(new ConnectionPool(20, 5L, TimeUnit.MINUTES));
+            builder.connectionPool(new ConnectionPool(endpoint.connectionPoolMaxIdleConnections, endpoint.connectionPoolKeepAliveDuration, TimeUnit.SECONDS));
             okHttpClient = builder.build();
         }
 

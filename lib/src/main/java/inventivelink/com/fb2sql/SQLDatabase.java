@@ -14,7 +14,6 @@ public class SQLDatabase {
 
     private static SQLDatabase instance = null;
     private SQLDatabaseEndpoint endPoint;
-    public boolean kotlinEnabled =false;
 
     public static synchronized SQLDatabase getInstance() {
         if (instance == null)
@@ -75,26 +74,42 @@ public class SQLDatabase {
     }
 
     @PublicApi
-    public SQLDatabase setConnectionTimeout(int connectionTimeout) {
+    public SQLDatabase setConnectionTimeout(int connectionTimeoutSeconds) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
-        endPoint.connectionTimeout = connectionTimeout;
+        endPoint.connectionTimeout = connectionTimeoutSeconds;
         return this;
     }
 
     @PublicApi
-    public SQLDatabase setReadTimeout(int readTimeout) {
+    public SQLDatabase setReadTimeout(int readTimeoutSeconds) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
-        endPoint.readTimeout = readTimeout;
+        endPoint.readTimeout = readTimeoutSeconds;
         return this;
     }
 
     @PublicApi
-    public SQLDatabase setWriteTimeout(int writeTimeout) {
+    public SQLDatabase setWriteTimeout(int writeTimeoutSeconds) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
-        endPoint.writeTimeout = writeTimeout;
+        endPoint.writeTimeout = writeTimeoutSeconds;
+        return this;
+    }
+
+    @PublicApi
+    public SQLDatabase setConnectionPoolMaxIdleConnections(int maxIdleConnections) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.connectionPoolMaxIdleConnections = maxIdleConnections;
+        return this;
+    }
+
+    @PublicApi
+    public SQLDatabase setConnectionPoolKeepAliveDuration(int keepAliveDurationInSeconds) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.connectionPoolKeepAliveDuration = keepAliveDurationInSeconds;
         return this;
     }
 
@@ -104,11 +119,6 @@ public class SQLDatabase {
         return this;
     }
 
-    @PublicApi
-    public SQLDatabase enableKotlin(boolean enable) {
-        this.kotlinEnabled = enable;
-        return this;
-    }
 
 }
 

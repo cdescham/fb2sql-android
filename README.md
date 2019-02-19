@@ -73,6 +73,6 @@ curl -X GET "http://127.0.0.1:8000/api/mums?yooMumAccount=true" -H "accept: appl
 
 
 
-curl -X GET  "https://api-php-dev.yoomum.com/api/feeds?order%5Btimestamp%5D=desc&timestamp%5Bafter%5D=572290947&itemsPerPage=50" -H "accept: application/ld+json" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
+curl -X GET  "https://api-php-dev.yoomum.com/api/events?order%5BstartDate%5D=asc&startDate%5Bafter%5D=572309990&itemsPerPage=5" -H "accept: application/ld+json" -H "X-Auth-Token: 4UFsaVeqleSIMbvRqBfnlZ0mnE"
 
 https://api-php-dev.yoomum.com/api/feeds?order%5Btimestamp%5D=desc&timestamp%5Bafter%5D=572290947&itemsPerPage=50,
