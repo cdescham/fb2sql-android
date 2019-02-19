@@ -11,7 +11,6 @@ public class SQLDatabaseHelper {
         }
     }
 
-
     public static String getIdFromIri(String IRI) {
         return Uri.parse(IRI).getLastPathSegment();
     }

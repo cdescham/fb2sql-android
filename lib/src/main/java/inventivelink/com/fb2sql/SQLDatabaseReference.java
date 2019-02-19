@@ -21,7 +21,6 @@ import com.google.firebase.database.util.JsonMapper;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,6 @@ public class SQLDatabaseReference {
     private String geoSearch = null;
     private String parameters = null;
     private Object pivotfield = null;
-    private ArrayList<String> propertiesToExpandFromIRI = null;
 
 
     public SQLDatabaseReference(String table) {
@@ -72,15 +70,6 @@ public class SQLDatabaseReference {
             SQLDatabaseLogger.abort("Child call too many times. Maximum time is 2, child(<table>).child(<primary key>)");
         return this;
     }
-
-    @PublicApi
-    public SQLDatabaseReference expandPropertyFromIRI(String property) {
-        if (propertiesToExpandFromIRI == null)
-            propertiesToExpandFromIRI = new ArrayList<>();
-        propertiesToExpandFromIRI.add(property);
-        return this;
-    }
-
 
     @PublicApi
     public SQLDatabaseReference limitToFirst(Integer limit) {
