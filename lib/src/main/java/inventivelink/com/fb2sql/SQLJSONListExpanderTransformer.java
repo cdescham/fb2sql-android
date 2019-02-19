@@ -28,9 +28,9 @@ import java.util.Map;
 
 
 public class SQLJSONListExpanderTransformer implements SQLJSONTransformer {
-    String property; // friends
-    String subKeyName; // friendId
-    String subPropertyName; // state
+    String property;
+    String subKeyName;
+    String subPropertyName;
 
     public SQLJSONListExpanderTransformer(String property, String subKeyName, String subPropertyName) {
         this.property = property;

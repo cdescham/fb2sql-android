@@ -5,15 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static inventivelink.com.fb2sql.SQLDatabaseHelper.getIdFromIri;
+
 /*
  favoriteLocations=[
          {
-         location=/api/locations/-LZ-DJqICoDUN4Nwerw9,
-@id=/api/favorite_locations/3,
-        id=3,
-@type=FavoriteLocations
+            location=/api/locations/-LZ-DJqICoDUN4Nwerw9,
+            @id=/api/favorite_locations/3,
+            id=3,
+            @type=FavoriteLocations
         }
-        ],
+        ], ...
 
 ->
 
@@ -31,12 +33,11 @@ public class SQLJSONHashListToStringListTransformer implements SQLJSONTransforme
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {
-        HashMap<String,Object> hash = new HashMap<>();
         List<HashMap<String, Object>> list = (List<HashMap<String, Object>>) input.get(property);
         List<String> listOfKeys = new ArrayList<>();
         if (list != null) {
             for (HashMap e : list) {
-                listOfKeys.add(SQLJSONCommonNormalizer.getIdFromIri((String) e.get(key)));
+                listOfKeys.add(getIdFromIri((String) e.get(key)));
             }
             input.put(property, listOfKeys);
         }

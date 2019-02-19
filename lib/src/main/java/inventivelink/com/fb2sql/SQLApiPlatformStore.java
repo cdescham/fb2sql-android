@@ -57,7 +57,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .post(RequestBody.create(mediaType, json))
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201,json);
     }
 
     public static void update(String table, final String id, String json, final TaskCompletionSource<Void> source) {
@@ -68,7 +68,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .put(RequestBody.create(mediaType, json))
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200,json);
     }
 
 
@@ -117,7 +117,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .delete()
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 204);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 204,null);
         SQLDatabaseLogger.debug("DELETE:" + point);
     }
 
@@ -166,9 +166,9 @@ public class SQLApiPlatformStore {
         });
     }
 
-    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode) {
+    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, String json) {
         final Long seq = getSeqNum();
-        SQLDatabaseLogger.debug("["+seq+"][write request] " + request+ ":"+request.body());
+        SQLDatabaseLogger.debug("["+seq+"][write request] " + request+ ":"+json);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {

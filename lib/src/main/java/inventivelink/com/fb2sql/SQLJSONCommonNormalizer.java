@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static inventivelink.com.fb2sql.SQLDatabaseHelper.getIdFromIri;
+
 public class SQLJSONCommonNormalizer implements SQLJSONTransformer {
 
 
-    public static String getIdFromIri(String IRI) {
-        return Uri.parse((String)IRI).getLastPathSegment();
-    }
 
     public SQLJSONCommonNormalizer() {
     }
