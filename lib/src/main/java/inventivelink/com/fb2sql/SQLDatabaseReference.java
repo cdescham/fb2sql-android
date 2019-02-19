@@ -21,6 +21,8 @@ import com.google.firebase.database.util.JsonMapper;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,17 +100,21 @@ public class SQLDatabaseReference {
             SQLDatabaseLogger.error("timestampStartAt called but no column defined by orderByChildDesc prior to this call. ");
             return this;
         }
-        addParameter(pivotfield + "%5Bafter%5D", secondsSinceCocoaStarts);
+        SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss");
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        addParameter(pivotfield + "%5Bafter%5D", sdf.format(new Date((secondsSinceCocoaStarts+978307200)*1000L)));
         return this;
     }
 
     @PublicApi
-    public SQLDatabaseReference timestampEndAt(Object value) {
+    public SQLDatabaseReference timestampEndAt(Long secondsSinceCocoaStarts) {
         if (pivotfield == null) {
             SQLDatabaseLogger.error("endAt called but no column defined by orderByChildDesc prior to this call. ");
             return this;
         }
-        addParameter(pivotfield + "%before%5D", value);
+        SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd%20HH:mm:ss");
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        addParameter(pivotfield + "%5Bbefore%5D", sdf.format(new Date((secondsSinceCocoaStarts+978307200)*1000L)));
         return this;
     }
 
