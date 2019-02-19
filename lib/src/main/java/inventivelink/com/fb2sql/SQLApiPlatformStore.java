@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
 import okhttp3.Callback;
+import okhttp3.ConnectionPool;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -122,20 +123,26 @@ public class SQLApiPlatformStore {
     }
 
 
-    private static OkHttpClient getClient(final SQLDatabaseEndpoint endpoint) {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.authenticator(new Authenticator() {
-            @Override
-            public Request authenticate(Route route, Response response) throws IOException {
-                String credential = Credentials.basic(endpoint.authUser, endpoint.authPass);
-                return response.request().newBuilder().header("Authorization", credential).build();
-            }
-        });
-        builder.connectTimeout(endpoint.connectionTimeout, TimeUnit.SECONDS);
-        builder.writeTimeout(endpoint.writeTimeout, TimeUnit.SECONDS);
-        builder.readTimeout(endpoint.readTimeout, TimeUnit.SECONDS);
+    private static OkHttpClient okHttpClient = null;
 
-        return builder.build();
+    private static OkHttpClient getClient(final SQLDatabaseEndpoint endpoint) {
+        if (okHttpClient == null) {
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            builder.authenticator(new Authenticator() {
+                @Override
+                public Request authenticate(Route route, Response response) throws IOException {
+                    String credential = Credentials.basic(endpoint.authUser, endpoint.authPass);
+                    return response.request().newBuilder().header("Authorization", credential).build();
+                }
+            });
+            builder.connectTimeout(endpoint.connectionTimeout, TimeUnit.SECONDS);
+            builder.writeTimeout(endpoint.writeTimeout, TimeUnit.SECONDS);
+            builder.readTimeout(endpoint.readTimeout, TimeUnit.SECONDS);
+            builder.connectionPool(new ConnectionPool(20, 5L, TimeUnit.MINUTES));
+            okHttpClient = builder.build();
+        }
+
+        return okHttpClient;
     }
 
     private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
