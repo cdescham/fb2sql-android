@@ -7,8 +7,12 @@
 
 package inventivelink.com.fb2sql;
 
+import android.content.Context;
+
 import com.google.firebase.annotations.PublicApi;
 import com.google.firebase.database.core.utilities.PushIdGenerator;
+
+import java.io.File;
 
 public class SQLDatabase {
 
@@ -110,6 +114,16 @@ public class SQLDatabase {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
         endPoint.connectionPoolKeepAliveDuration = keepAliveDurationInSeconds;
+        return this;
+    }
+
+    @PublicApi
+    public SQLDatabase enableCache(Context context, int sizeMb) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.cacheEnabled = true;
+        endPoint.contextForCache = context;
+        endPoint.cacheSizeMb = sizeMb;
         return this;
     }
 

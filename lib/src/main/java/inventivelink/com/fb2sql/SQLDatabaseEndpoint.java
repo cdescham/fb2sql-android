@@ -7,6 +7,10 @@
 
 package inventivelink.com.fb2sql;
 
+import android.content.Context;
+
+import java.io.File;
+
 public class SQLDatabaseEndpoint {
 
     public static String uriString = null;
@@ -18,6 +22,10 @@ public class SQLDatabaseEndpoint {
     public static int writeTimeout = 30;
     public static int connectionPoolMaxIdleConnections = 20;
     public static int connectionPoolKeepAliveDuration = 60;
+    public static boolean cacheEnabled;
+    public static Context contextForCache;
+    public static int cacheSizeMb;
+
 
     public SQLDatabaseEndpoint() {
     }

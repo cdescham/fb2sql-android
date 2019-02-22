@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
+import okhttp3.Cache;
+import okhttp3.CacheControl;
 import okhttp3.Callback;
 import okhttp3.ConnectionPool;
 import okhttp3.Credentials;
@@ -138,6 +140,8 @@ public class SQLApiPlatformStore {
             builder.connectTimeout(endpoint.connectionTimeout, TimeUnit.SECONDS);
             builder.writeTimeout(endpoint.writeTimeout, TimeUnit.SECONDS);
             builder.readTimeout(endpoint.readTimeout, TimeUnit.SECONDS);
+            if (endpoint.cacheEnabled)
+                builder.cache(new Cache(endpoint.contextForCache.getCacheDir(), endpoint.cacheSizeMb*1024*1024));
             builder.connectionPool(new ConnectionPool(endpoint.connectionPoolMaxIdleConnections, endpoint.connectionPoolKeepAliveDuration, TimeUnit.SECONDS));
             okHttpClient = builder.build();
         }
