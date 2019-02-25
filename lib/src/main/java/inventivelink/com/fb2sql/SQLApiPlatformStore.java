@@ -81,7 +81,7 @@ public class SQLApiPlatformStore {
 
 
     public static void update(final String table, final String id, final String json, final TaskCompletionSource<Void> source, final boolean insertOn404) {
-        SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
+        final SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final String point = endpoint.uriString + "/" + table + "/" + id;
         Request request = new Request.Builder()
                 .url(point)
@@ -103,6 +103,9 @@ public class SQLApiPlatformStore {
                     if (response.code() == 404 && insertOn404) {
                         insert(table, json, source);
                     } else if (response.code() == 200) {
+                        if (endpoint.localCacheEnabled) {
+                            SQLDatabaseLocalCache.getInstance().clear();
+                        }
                         source.setResult(null);
                     } else {
                         source.setException(new Exception("["+seq+"][update response] " + point + " : " + response.code()));
@@ -231,7 +234,7 @@ public class SQLApiPlatformStore {
         });
     }
 
-    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, String json) {
+    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, String json) {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][write request] " + request+ ":"+json);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
@@ -246,6 +249,9 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("["+seq+"][write response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
+                        if (endpoint.localCacheEnabled) {
+                            SQLDatabaseLocalCache.getInstance().clear();
+                        }
                         source.setResult(null);
                     } else {
                         source.setException(new Exception("write response : " + response.code()));
