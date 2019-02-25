@@ -95,7 +95,7 @@ public class SQLApiPlatformStore {
             @Override
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 try {
-                    SQLDatabaseLogger.debug("["+seq+"][update response] " + point + " code = " + response.code());
+                    SQLDatabaseLogger.debug("["+seq+"][update response] " + point + " code = " + response.code()+" "+response.body().string());
                     if (response.code() == 404 && insertOn404) {
                         insert(table, json, source);
                     } else if (response.code() == 200) {
@@ -154,7 +154,7 @@ public class SQLApiPlatformStore {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
 
-        if (endpoint.localCacheEnabled) {
+        if (id != null && endpoint.localCacheEnabled) {
             String json = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
             if (json != null) {
                 SQLDatabaseLogger.debug("["+seq+"][read response from local cache] " + request + " " + json);

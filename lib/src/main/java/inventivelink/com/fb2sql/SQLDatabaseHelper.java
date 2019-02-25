@@ -12,7 +12,11 @@ public class SQLDatabaseHelper {
     }
 
     public static String getIdFromIri(String IRI) {
-        return Uri.parse(IRI).getLastPathSegment();
+        Uri u = Uri.parse(IRI);
+        if (u.getPathSegments().size() == 3)
+            return u.getLastPathSegment();
+        else
+            return null;
     }
 
     public static String buildUriFromId(String property, String id) {
