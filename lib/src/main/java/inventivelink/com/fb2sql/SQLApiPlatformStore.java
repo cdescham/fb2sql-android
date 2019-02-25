@@ -154,7 +154,7 @@ public class SQLApiPlatformStore {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
 
-        if (id != null && endpoint.localCacheEnabled) {
+        if (endpoint.localCacheEnabled) {
             String json = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
             if (json != null) {
                 SQLDatabaseLogger.debug("["+seq+"][read response from local cache] " + request + " " + json);
