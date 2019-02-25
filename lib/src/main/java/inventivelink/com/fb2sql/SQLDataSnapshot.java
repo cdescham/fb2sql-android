@@ -35,6 +35,8 @@ public class SQLDataSnapshot {
 
     @PublicApi
     public <T> T getValue(@NonNull Class<T> valueType) {
+        if (jsonString == null)
+            return null;
         Map<String, Object> value = null;
         try {
             value = (new SQLJSONCommonNormalizer()).transform(JsonMapper.parseJson(jsonString));
@@ -67,6 +69,32 @@ public class SQLDataSnapshot {
 
     @PublicApi
     public Iterable<SQLDataSnapshot> getChildren() {
+
+        if (jsonString == null) {
+            return new Iterable<SQLDataSnapshot>() {
+                @Override
+                public Iterator<SQLDataSnapshot> iterator() {
+                    return new Iterator<SQLDataSnapshot>() {
+                        @Override
+                        public boolean hasNext() {
+                            return false;
+                        }
+
+                        @Override
+                        @NonNull
+                        public SQLDataSnapshot next() {
+                            return null;
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException("remove called on immutable collection");
+                        }
+                    };
+                }
+            };
+        }
+
         JsonElement jelement = new JsonParser().parse(jsonString);
         final JsonObject jobject = jelement.getAsJsonObject();
         final JsonArray children = jobject.getAsJsonArray("hydra:member");
@@ -97,6 +125,8 @@ public class SQLDataSnapshot {
 
     @PublicApi
     public Long childrenCount() {
+        if (jsonString == null)
+            return 0L;
         JsonElement jelement = new JsonParser().parse(jsonString);
         JsonObject jobject = jelement.getAsJsonObject();
         final JsonArray children = jobject.getAsJsonArray("hydra:member");

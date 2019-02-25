@@ -18,6 +18,8 @@ public class SQLDatabase {
 
     private static SQLDatabase instance = null;
     private SQLDatabaseEndpoint endPoint;
+    public static Context context;
+
 
     public static synchronized SQLDatabase getInstance() {
         if (instance == null)
@@ -118,12 +120,29 @@ public class SQLDatabase {
     }
 
     @PublicApi
-    public SQLDatabase enableCache(Context context, int sizeMb) {
+    public SQLDatabase enableOkhttpCache(int sizeMb) {
         if (endPoint == null)
             endPoint = new SQLDatabaseEndpoint();
-        endPoint.cacheEnabled = true;
-        endPoint.contextForCache = context;
-        endPoint.cacheSizeMb = sizeMb;
+        endPoint.okHttpCacheEnabled = true;
+        endPoint.okHttpCacheSizeMb = sizeMb;
+        return this;
+    }
+
+
+    @PublicApi
+    public SQLDatabase enableLocalCache(int timeToLiveInSecondes) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.localCacheEnabled = true;
+        endPoint.localcacheTTL = timeToLiveInSecondes;
+        return this;
+    }
+
+    @PublicApi
+    public SQLDatabase setRetryTimeout(int retryyTimeoutSeconds) {
+        if (endPoint == null)
+            endPoint = new SQLDatabaseEndpoint();
+        endPoint.retryTimeOut = retryyTimeoutSeconds;
         return this;
     }
 
@@ -133,6 +152,12 @@ public class SQLDatabase {
         return this;
     }
 
+
+    @PublicApi
+    public SQLDatabase setContext(Context context) {
+        this.context = context;
+        return this;
+    }
 
 }
 

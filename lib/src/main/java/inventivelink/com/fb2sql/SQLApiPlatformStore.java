@@ -11,6 +11,7 @@ package inventivelink.com.fb2sql;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
@@ -21,6 +22,7 @@ import okhttp3.ConnectionPool;
 import okhttp3.Credentials;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -32,7 +34,6 @@ public class SQLApiPlatformStore {
     private static MediaType mediaType = MediaType.parse("application/ld+json");
 
     private static Long seqNum = 0L;
-
 
     private static synchronized Long getSeqNum() {
         return seqNum++;
@@ -140,8 +141,8 @@ public class SQLApiPlatformStore {
             builder.connectTimeout(endpoint.connectionTimeout, TimeUnit.SECONDS);
             builder.writeTimeout(endpoint.writeTimeout, TimeUnit.SECONDS);
             builder.readTimeout(endpoint.readTimeout, TimeUnit.SECONDS);
-            if (endpoint.cacheEnabled)
-                builder.cache(new Cache(endpoint.contextForCache.getCacheDir(), endpoint.cacheSizeMb*1024*1024));
+            if (endpoint.okHttpCacheEnabled)
+                builder.cache(new Cache(SQLDatabase.context.getCacheDir(), endpoint.okHttpCacheSizeMb*1024*1024));
             builder.connectionPool(new ConnectionPool(endpoint.connectionPoolMaxIdleConnections, endpoint.connectionPoolKeepAliveDuration, TimeUnit.SECONDS));
             okHttpClient = builder.build();
         }
@@ -149,13 +150,30 @@ public class SQLApiPlatformStore {
         return okHttpClient;
     }
 
-    private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
+    private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
+
+        if (endpoint.localCacheEnabled) {
+            String json = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
+            if (json != null) {
+                SQLDatabaseLogger.debug("["+seq+"][read response from local cache] " + request + " " + json);
+                source.setResult(new SQLDataSnapshot(json, table));
+                return;
+            }
+        }
+
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
-                source.setException(e);
+                try {
+                    while (!SQLDatabaseConnectivityHelper.isConnectedToNetwork(SQLDatabase.context)) {
+                        Thread.sleep(endpoint.retryTimeOut*1000);
+                    }
+                    enqueueReadRequestForEndpointAndExpectedReturnCode(source, request, endpoint, successReturnCode, id, table);
+                } catch (InterruptedException exception) {
+
+                }
             }
 
             @Override
@@ -164,6 +182,9 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("["+seq+"][read response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
+                        if (endpoint.localCacheEnabled) {
+                            SQLDatabaseLocalCache.getInstance().put(request.url().toString(),responseString);
+                        }
                         source.setResult(new SQLDataSnapshot(responseString, table));
                     } else {
                         source.setException(new Exception("read response : " + response.code()));

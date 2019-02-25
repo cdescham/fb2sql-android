@@ -22,9 +22,11 @@ public class SQLDatabaseEndpoint {
     public static int writeTimeout = 30;
     public static int connectionPoolMaxIdleConnections = 20;
     public static int connectionPoolKeepAliveDuration = 60;
-    public static boolean cacheEnabled;
-    public static Context contextForCache;
-    public static int cacheSizeMb;
+    public static boolean okHttpCacheEnabled;
+    public static int okHttpCacheSizeMb;
+    public static int localcacheTTL;
+    public static boolean localCacheEnabled;
+    public static int retryTimeOut; // Time between retries for reading.
 
 
     public SQLDatabaseEndpoint() {
