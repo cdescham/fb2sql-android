@@ -11,7 +11,11 @@ package inventivelink.com.fb2sql;
 import com.google.android.gms.tasks.TaskCompletionSource;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Authenticator;
@@ -150,7 +154,24 @@ public class SQLApiPlatformStore {
         return okHttpClient;
     }
 
-    private static void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
+   static ConcurrentHashMap<String, List<TaskCompletionSource<SQLDataSnapshot>>> ongoing = new ConcurrentHashMap();
+
+
+    private static synchronized  void applyTasksResult(Request request,String responseString,String table) {
+        for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
+            t.setResult(new SQLDataSnapshot(responseString, table));
+        }
+        ongoing.remove(request.url().toString());
+    }
+
+    private static synchronized  void applyTasksException(Request request,Exception e) {
+        for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
+            t.setException(e);
+        }
+        ongoing.remove(request.url().toString());
+    }
+
+    private static synchronized void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
 
@@ -163,13 +184,24 @@ public class SQLApiPlatformStore {
             }
         }
 
+        if (ongoing.containsKey(request.url().toString())) {
+            SQLDatabaseLogger.debug("["+seq+"][read similar request already in progress - waiting for result] " + request);
+            ongoing.get(request.url().toString()).add(source);
+            return;
+        }
+
+        ArrayList <TaskCompletionSource<SQLDataSnapshot>> al = new ArrayList<>();
+        al.add(source);
+        ongoing.put(request.url().toString(),al);
+
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
                 try {
-                    while (!SQLDatabaseConnectivityHelper.isConnectedToNetwork(SQLDatabase.context)) {
+                    do {
                         Thread.sleep(endpoint.retryTimeOut*1000);
-                    }
+                        SQLDatabaseLogger.debug("["+seq+"][read request retrying] " + request);
+                    } while (!SQLDatabaseConnectivityHelper.isConnectedToNetwork(SQLDatabase.context));
                     enqueueReadRequestForEndpointAndExpectedReturnCode(source, request, endpoint, successReturnCode, id, table);
                 } catch (InterruptedException exception) {
 
@@ -185,14 +217,15 @@ public class SQLApiPlatformStore {
                         if (endpoint.localCacheEnabled) {
                             SQLDatabaseLocalCache.getInstance().put(request.url().toString(),responseString);
                         }
-                        source.setResult(new SQLDataSnapshot(responseString, table));
+                        applyTasksResult(request,responseString,table);
                     } else {
-                        source.setException(new Exception("read response : " + response.code()));
+                        applyTasksException(request,new Exception("read exception : " + response.code()));
+
                     }
                 } catch (Exception e) {
                     SQLDatabaseLogger.error("["+seq+"][read response] exception = " + e);
                     e.printStackTrace();
-                    source.setException(e);
+                    applyTasksException(request,e);
                 }
             }
         });
