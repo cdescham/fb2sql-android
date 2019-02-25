@@ -1,11 +1,12 @@
 package inventivelink.com.fb2sql;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SQLDatabaseLocalCache {
 
     private static SQLDatabaseLocalCache instance = null;
-    private HashMap<String,CacheObject> cache = new HashMap<>();
+    private ConcurrentHashMap<String,CacheObject> cache = new ConcurrentHashMap<>();
 
     public static synchronized SQLDatabaseLocalCache getInstance() {
         if (instance == null)
@@ -45,5 +46,10 @@ public class SQLDatabaseLocalCache {
             cache.put(url,new CacheObject(jsonString));
         }
     }
+
+    public synchronized void clear() {
+        cache.clear();
+    }
+
 
 }

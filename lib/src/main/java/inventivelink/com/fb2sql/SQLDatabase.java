@@ -159,5 +159,11 @@ public class SQLDatabase {
         return this;
     }
 
+    @PublicApi
+    public void clearCache() {
+        if (endPoint != null && endPoint.localCacheEnabled)
+            SQLDatabaseLocalCache.getInstance().clear();
+    }
+
 }
 
