@@ -206,7 +206,7 @@ public class SQLDatabaseReference {
                 finalHash.put(property,bouncedUpdate.get(property));
             }
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
-            SQLApiPlatformStore.update(table, id, new Gson().toJson(finalHash), source, false);
+            SQLApiPlatformStore.update(table, id, new Gson().toJson(finalHash), source, true);
             return source.getTask();
         } catch (Exception e) {
             return new SQLDatabaseError(e).asVoidTask();
@@ -225,7 +225,7 @@ public class SQLDatabaseReference {
                 bouncedUpdate = deNormalize(bouncedUpdate,deNormalizers,property);
             String json = new Gson().toJson(bouncedUpdate);
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
-            SQLApiPlatformStore.update(table, id, json, source, false);
+            SQLApiPlatformStore.update(table, id, json, source, true);
             return source.getTask();
         } catch (Exception e) {
             e.printStackTrace();
