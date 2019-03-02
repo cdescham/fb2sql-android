@@ -53,7 +53,32 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .get()
                 .build();
-        enqueueReadRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200, id, table);
+
+        final Long seq = getSeqNum();
+        SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
+
+        if (endpoint.localCacheEnabled) {
+            String json = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
+            if (json != null) {
+                SQLDatabaseLogger.debug("["+seq+"][read response from local cache] " + request + " " + json);
+                source.setResult(new SQLDataSnapshot(json, table));
+                return source;
+            }
+        }
+
+        synchronized (ongoing) {
+            if (ongoing.containsKey(request.url().toString())) {
+                SQLDatabaseLogger.debug("[" + seq + "][read similar request already in progress - waiting for result] " + request);
+                ongoing.get(request.url().toString()).add(source);
+                return source;
+            }
+
+            ArrayList<TaskCompletionSource<SQLDataSnapshot>> al = new ArrayList<>();
+            al.add(source);
+            ongoing.put(request.url().toString(), al);
+        }
+
+        enqueueReadRequestForEndpointAndExpectedReturnCode(seq,request, endpoint, 200, id, table);
         return source;
     }
 
@@ -164,38 +189,22 @@ public class SQLApiPlatformStore {
         for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
             t.setResult(new SQLDataSnapshot(responseString, table));
         }
-        ongoing.remove(request.url().toString());
+        synchronized (ongoing) {
+            ongoing.remove(request.url().toString());
+        }
     }
 
     private static synchronized  void applyTasksException(Request request,Exception e) {
         for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
             t.setException(e);
         }
-        ongoing.remove(request.url().toString());
+        synchronized (ongoing) {
+            ongoing.remove(request.url().toString());
+        }
     }
 
-    private static synchronized void enqueueReadRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<SQLDataSnapshot> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
-        final Long seq = getSeqNum();
-        SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
+    private static synchronized void enqueueReadRequestForEndpointAndExpectedReturnCode(final Long seq,final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, final String id, final String table) {
 
-        if (endpoint.localCacheEnabled) {
-            String json = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
-            if (json != null) {
-                SQLDatabaseLogger.debug("["+seq+"][read response from local cache] " + request + " " + json);
-                source.setResult(new SQLDataSnapshot(json, table));
-                return;
-            }
-        }
-
-        if (ongoing.containsKey(request.url().toString())) {
-            SQLDatabaseLogger.debug("["+seq+"][read similar request already in progress - waiting for result] " + request);
-            ongoing.get(request.url().toString()).add(source);
-            return;
-        }
-
-        ArrayList <TaskCompletionSource<SQLDataSnapshot>> al = new ArrayList<>();
-        al.add(source);
-        ongoing.put(request.url().toString(),al);
 
         getClient(endpoint).newCall(request).enqueue(new Callback() {
             @Override
@@ -205,7 +214,7 @@ public class SQLApiPlatformStore {
                         Thread.sleep(endpoint.retryTimeOut*1000);
                         SQLDatabaseLogger.debug("["+seq+"][read request retrying] " + request);
                     } while (!SQLDatabaseConnectivityHelper.isConnectedToNetwork(SQLDatabase.context));
-                    enqueueReadRequestForEndpointAndExpectedReturnCode(source, request, endpoint, successReturnCode, id, table);
+                    enqueueReadRequestForEndpointAndExpectedReturnCode(seq,request, endpoint, successReturnCode, id, table);
                 } catch (InterruptedException exception) {
 
                 }
