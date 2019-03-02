@@ -31,6 +31,7 @@ public class SQLDatabaseReference {
     private String table = null;
     private String id = null;
     private String geoSearch = null;
+    private Double geoSearchRadius;
     private String parameters = null;
     private Object pivotfield = null;
 
@@ -262,35 +263,45 @@ public class SQLDatabaseReference {
     @PublicApi
     public SQLDatabaseReference queryAtLocation(@NonNull Double latitude, @NonNull Double longitude, Double distance, String unit) {
         geoSearch = "geo_search/" + latitude + "/" + longitude + "/" + distance + unit;
+        geoSearchRadius = distance;
         return this;
     }
 
     @PublicApi
     public void addGeoQueryEventListener(@NonNull final SQLGeoQueryEventListener listener) {
-        Task<SQLDataSnapshot> source = SQLApiPlatformStore.get(table, id, geoSearch, getParameters()).getTask();
-        source.addOnCompleteListener(new OnCompleteListener<SQLDataSnapshot>() {
-            @Override
-            public void onComplete(final @NonNull Task<SQLDataSnapshot> task) {
-                if (task.isSuccessful())
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            SQLDataSnapshot list = task.getResult();
-                            for (SQLDataSnapshot s : list.getChildren()) {
-                                listener.onKeyEntered(s);
+        if (geoSearchRadius > 0) {
+            Task<SQLDataSnapshot> source = SQLApiPlatformStore.get(table, id, geoSearch, getParameters()).getTask();
+            source.addOnCompleteListener(new OnCompleteListener<SQLDataSnapshot>() {
+                @Override
+                public void onComplete(final @NonNull Task<SQLDataSnapshot> task) {
+                    if (task.isSuccessful())
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                SQLDataSnapshot list = task.getResult();
+                                for (SQLDataSnapshot s : list.getChildren()) {
+                                    listener.onKeyEntered(s);
+                                }
+                                listener.onGeoQueryReady();
                             }
-                            listener.onGeoQueryReady();
-                        }
-                    });
-                else
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.onGeoQueryError(new SQLDatabaseError(task.getException()));
-                        }
-                    });
-            }
-        });
+                        });
+                    else
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGeoQueryError(new SQLDatabaseError(task.getException()));
+                            }
+                        });
+                }
+            });
+        } else {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    listener.onGeoQueryReady();
+                }
+            });
+        }
     }
 
 }
