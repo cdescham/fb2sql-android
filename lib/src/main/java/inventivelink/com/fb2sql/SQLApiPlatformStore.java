@@ -58,10 +58,10 @@ public class SQLApiPlatformStore {
         SQLDatabaseLogger.debug("["+seq+"][read request] " + request);
 
         if (endpoint.localCacheEnabled) {
-            String json = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
-            if (json != null) {
-                SQLDatabaseLogger.debug("["+seq+"][read response from local cache] " + request + " " + json);
-                source.setResult(new SQLDataSnapshot(json, table));
+            SQLDataSnapshot cachedSnap = SQLDatabaseLocalCache.getInstance().get(request.url().toString(),endpoint.localcacheTTL);
+            if (cachedSnap != null) {
+                SQLDatabaseLogger.debug("["+seq+"][read snapshot from local cache] " + request);
+                source.setResult(cachedSnap);
                 return source;
             }
         }
@@ -185,13 +185,15 @@ public class SQLApiPlatformStore {
    static ConcurrentHashMap<String, List<TaskCompletionSource<SQLDataSnapshot>>> ongoing = new ConcurrentHashMap();
 
 
-    private static synchronized  void applyTasksResult(Request request,String responseString,String table) {
+    private static synchronized  SQLDataSnapshot applyTasksResult(Request request,String responseString,String table) {
+        SQLDataSnapshot snap = new SQLDataSnapshot(responseString, table);
         for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
-            t.setResult(new SQLDataSnapshot(responseString, table));
+            t.setResult(snap);
         }
         synchronized (ongoing) {
             ongoing.remove(request.url().toString());
         }
+        return snap;
     }
 
     private static synchronized  void applyTasksException(Request request,Exception e) {
@@ -226,10 +228,10 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("["+seq+"][read response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
+                        SQLDataSnapshot snap = applyTasksResult(request,responseString,table);
                         if (endpoint.localCacheEnabled) {
-                            SQLDatabaseLocalCache.getInstance().put(request.url().toString(),responseString);
+                            SQLDatabaseLocalCache.getInstance().put(request.url().toString(),snap);
                         }
-                        applyTasksResult(request,responseString,table);
                     } else {
                         applyTasksException(request,new Exception("read exception : " + response.code()));
 

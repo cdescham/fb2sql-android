@@ -26,6 +26,8 @@ public class SQLDataSnapshot {
     private String jsonString;
     private String table;
     private String key;
+    private Object cachedValue = null;
+    private  Iterable<SQLDataSnapshot> cachedValues = null;
 
 
     public SQLDataSnapshot(String jsonString,String table) {
@@ -35,6 +37,10 @@ public class SQLDataSnapshot {
 
     @PublicApi
     public <T> T getValue(@NonNull Class<T> valueType) {
+        if (cachedValue != null) {
+            return (T) cachedValue;
+        }
+
         if (jsonString == null)
             return null;
         Map<String, Object> value = null;
@@ -54,7 +60,8 @@ public class SQLDataSnapshot {
                     value = normalizer.transform(value);
             }
             key = (String) value.get(table.substring(0, table.length() - 1)+"Id");
-            return CustomClassMapper.convertToCustomClass(value, valueType);
+            cachedValue =  CustomClassMapper.convertToCustomClass(value, valueType);
+            return (T) cachedValue;
         } catch (Exception e) {
             SQLDatabaseLogger.error("Exception in getValue Exception=" + e + " json=" + value);
             e.printStackTrace();
@@ -70,8 +77,11 @@ public class SQLDataSnapshot {
     @PublicApi
     public Iterable<SQLDataSnapshot> getChildren() {
 
+        if (cachedValues != null)
+            return cachedValues;
+
         if (jsonString == null) {
-            return new Iterable<SQLDataSnapshot>() {
+            cachedValues =  new Iterable<SQLDataSnapshot>() {
                 @Override
                 public Iterator<SQLDataSnapshot> iterator() {
                     return new Iterator<SQLDataSnapshot>() {
@@ -98,7 +108,7 @@ public class SQLDataSnapshot {
         JsonElement jelement = new JsonParser().parse(jsonString);
         final JsonObject jobject = jelement.getAsJsonObject();
         final JsonArray children = jobject.getAsJsonArray("hydra:member");
-        return new Iterable<SQLDataSnapshot>() {
+        cachedValues = new Iterable<SQLDataSnapshot>() {
             @Override
             public Iterator<SQLDataSnapshot> iterator() {
                 final Iterator<JsonElement> c = children.iterator();
@@ -121,6 +131,7 @@ public class SQLDataSnapshot {
                 };
             }
         };
+        return cachedValues;
     }
 
     @PublicApi

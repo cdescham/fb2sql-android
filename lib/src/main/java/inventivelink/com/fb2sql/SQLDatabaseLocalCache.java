@@ -17,33 +17,33 @@ public class SQLDatabaseLocalCache {
 
     private class CacheObject {
         public Long storedTimeStamp;
-        public String jsonString;
+        public SQLDataSnapshot snapshot;
 
-        public CacheObject(String json) {
+        public CacheObject(SQLDataSnapshot snapshot) {
             this.storedTimeStamp = System.currentTimeMillis();
-            this.jsonString = json;
+            this.snapshot = snapshot;
         }
     }
 
-    public synchronized String get(String url,int ttl) {
+    public synchronized SQLDataSnapshot get(String url,int ttl) {
         CacheObject o = cache.get(url);
         if (o != null) {
             if (o.storedTimeStamp+ ttl*1000 <= System.currentTimeMillis()) {
                 cache.remove(url);
                 return null;
             } else
-                return o.jsonString;
+                return o.snapshot;
         } else
             return null;
     }
 
 
-    public synchronized void put(String url,String jsonString) {
+    public synchronized void put(String url,SQLDataSnapshot snapshot) {
         CacheObject o = cache.get(url);
         if (o != null) {
             o.storedTimeStamp = System.currentTimeMillis();
         } else {
-            cache.put(url,new CacheObject(jsonString));
+            cache.put(url,new CacheObject(snapshot));
         }
     }
 
