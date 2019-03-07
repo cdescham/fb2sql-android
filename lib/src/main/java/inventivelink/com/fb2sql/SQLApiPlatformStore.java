@@ -82,7 +82,7 @@ public class SQLApiPlatformStore {
         return source;
     }
 
-    public static void insert(String table, String json, final TaskCompletionSource<Void> source) {
+    public static void insert(String table, String json, final TaskCompletionSource<Void> source,final boolean keepCache) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         String point = endpoint.uriString + "/" + table;
         Request request = new Request.Builder()
@@ -90,10 +90,10 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .post(RequestBody.create(mediaType, json))
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201,json);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 201,json,keepCache);
     }
 
-    public static void update(String table, final String id, String json, final TaskCompletionSource<Void> source) {
+    public static void update(String table, final String id, String json, final TaskCompletionSource<Void> source,final boolean keepCache) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final String point = endpoint.uriString + "/" + table + "/" + id;
         Request request = new Request.Builder()
@@ -101,11 +101,11 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .put(RequestBody.create(mediaType, json))
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200,json);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 200,json,keepCache);
     }
 
 
-    public static void update(final String table, final String id, final String json, final TaskCompletionSource<Void> source, final boolean insertOn404) {
+    public static void update(final String table, final String id, final String json, final TaskCompletionSource<Void> source, final boolean insertOn404,final boolean keepCache) {
         final SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         final String point = endpoint.uriString + "/" + table + "/" + id;
         Request request = new Request.Builder()
@@ -126,9 +126,9 @@ public class SQLApiPlatformStore {
                 try {
                     SQLDatabaseLogger.debug("["+seq+"][update response] " + point + " code = " + response.code()+" "+response.body().string());
                     if (response.code() == 404 && insertOn404) {
-                        insert(table, json, source);
+                        insert(table, json, source,keepCache);
                     } else if (response.code() == 200) {
-                        if (endpoint.localCacheEnabled) {
+                        if (endpoint.localCacheEnabled && !keepCache) {
                             SQLDatabaseLocalCache.getInstance().clear();
                         }
                         source.setResult(null);
@@ -145,7 +145,7 @@ public class SQLApiPlatformStore {
     }
 
 
-    public static void delete(String table, String id, final TaskCompletionSource<Void> source) {
+    public static void delete(String table, String id, final TaskCompletionSource<Void> source,final boolean keepCache) {
         SQLDatabaseEndpoint endpoint = SQLDatabase.getInstance().getEndPoint();
         String point = endpoint.uriString + "/" + table + "/" + id;
         Request request = new Request.Builder()
@@ -153,7 +153,7 @@ public class SQLApiPlatformStore {
                 .header("X-AUTH-TOKEN", endpoint.authToken)
                 .delete()
                 .build();
-        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 204,null);
+        enqueueWriteRequestForEndpointAndExpectedReturnCode(source, request, endpoint, 204,null,keepCache);
         SQLDatabaseLogger.debug("DELETE:" + point);
     }
 
@@ -245,7 +245,7 @@ public class SQLApiPlatformStore {
         });
     }
 
-    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, String json) {
+    private static void enqueueWriteRequestForEndpointAndExpectedReturnCode(final TaskCompletionSource<Void> source, final Request request, final SQLDatabaseEndpoint endpoint, final int successReturnCode, String json,final boolean keepCache) {
         final Long seq = getSeqNum();
         SQLDatabaseLogger.debug("["+seq+"][write request] " + request+ ":"+json);
         getClient(endpoint).newCall(request).enqueue(new Callback() {
@@ -260,7 +260,7 @@ public class SQLApiPlatformStore {
                     String responseString = response.body().string();
                     SQLDatabaseLogger.debug("["+seq+"][write response] " + request + " code = " + response.code() + " " + responseString);
                     if (response.code() == successReturnCode) {
-                        if (endpoint.localCacheEnabled) {
+                        if (endpoint.localCacheEnabled && !keepCache) {
                             SQLDatabaseLocalCache.getInstance().clear();
                         }
                         source.setResult(null);

@@ -34,6 +34,7 @@ public class SQLDatabaseReference {
     private Double geoSearchRadius;
     private String parameters = null;
     private Object pivotfield = null;
+    private boolean keepCache = false;
 
 
     public SQLDatabaseReference(String table) {
@@ -49,6 +50,13 @@ public class SQLDatabaseReference {
 
     private String getParameters() {
         return parameters != null ? parameters : "";
+    }
+
+
+    @PublicApi
+    public SQLDatabaseReference keepCache(boolean keepCache) {
+        this.keepCache = keepCache;
+        return this;
     }
 
     @PublicApi
@@ -182,11 +190,11 @@ public class SQLDatabaseReference {
                 json = new Gson().toJson(bouncedUpdate);
             }
             if (id == null)
-                SQLApiPlatformStore.insert(table, json, source);
+                SQLApiPlatformStore.insert(table, json, source,keepCache);
             else
                 SQLApiPlatformStore.update(table, id, json, source, true);
         } else {
-                SQLApiPlatformStore.delete(table, id, source);
+                SQLApiPlatformStore.delete(table, id, source,keepCache);
         }
         return source.getTask();
     }
