@@ -192,7 +192,7 @@ public class SQLDatabaseReference {
             if (id == null)
                 SQLApiPlatformStore.insert(table, json, source,keepCache);
             else
-                SQLApiPlatformStore.update(table, id, json, source, true);
+                SQLApiPlatformStore.update(table, id, json, source,true, keepCache);
         } else {
                 SQLApiPlatformStore.delete(table, id, source,keepCache);
         }
@@ -215,7 +215,7 @@ public class SQLDatabaseReference {
                 finalHash.put(property,bouncedUpdate.get(property));
             }
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
-            SQLApiPlatformStore.update(table, id, new Gson().toJson(finalHash), source, true);
+            SQLApiPlatformStore.update(table, id, new Gson().toJson(finalHash), source,true, keepCache);
             return source.getTask();
         } catch (Exception e) {
             return new SQLDatabaseError(e).asVoidTask();
@@ -234,7 +234,7 @@ public class SQLDatabaseReference {
                 bouncedUpdate = deNormalize(bouncedUpdate,deNormalizers,property);
             String json = new Gson().toJson(bouncedUpdate);
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
-            SQLApiPlatformStore.update(table, id, json, source, true);
+            SQLApiPlatformStore.update(table, id, json, source,true,keepCache);
             return source.getTask();
         } catch (Exception e) {
             e.printStackTrace();
