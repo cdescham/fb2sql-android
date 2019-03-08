@@ -26,8 +26,9 @@ public class SQLDataSnapshot {
     private String jsonString;
     private String table;
     private String key;
-    private Object cachedValue = null;
-    private  Iterable<SQLDataSnapshot> cachedValues = null;
+    private  Map<String, Object> cachedValue = null;
+    private Iterable<SQLDataSnapshot> cachedValues = null;
+    private Long childrenCount = null;
 
 
     public SQLDataSnapshot(String jsonString,String table) {
@@ -38,7 +39,7 @@ public class SQLDataSnapshot {
     @PublicApi
     public <T> T getValue(@NonNull Class<T> valueType) {
         if (cachedValue != null) {
-            return (T) cachedValue;
+            return CustomClassMapper.convertToCustomClass(cachedValue, valueType);
         }
 
         if (jsonString == null)
@@ -60,8 +61,8 @@ public class SQLDataSnapshot {
                     value = normalizer.transform(value);
             }
             key = (String) value.get(table.substring(0, table.length() - 1)+"Id");
-            cachedValue =  CustomClassMapper.convertToCustomClass(value, valueType);
-            return (T) cachedValue;
+            cachedValue = value;
+            return CustomClassMapper.convertToCustomClass(cachedValue, valueType);
         } catch (Exception e) {
             SQLDatabaseLogger.error("Exception in getValue Exception=" + e + " json=" + value);
             e.printStackTrace();
@@ -76,6 +77,7 @@ public class SQLDataSnapshot {
 
     @PublicApi
     public Iterable<SQLDataSnapshot> getChildren() {
+
 
         if (cachedValues != null)
             return cachedValues;
@@ -103,39 +105,42 @@ public class SQLDataSnapshot {
                     };
                 }
             };
+        } else {
+            JsonElement jelement = new JsonParser().parse(jsonString);
+            final JsonObject jobject = jelement.getAsJsonObject();
+            final JsonArray children = jobject.getAsJsonArray("hydra:member");
+            childrenCount = new Long(children.size());
+            cachedValues = new Iterable<SQLDataSnapshot>() {
+                @Override
+                public Iterator<SQLDataSnapshot> iterator() {
+                    final Iterator<JsonElement> c = children.iterator();
+                    return new Iterator<SQLDataSnapshot>() {
+                        @Override
+                        public boolean hasNext() {
+                            return c.hasNext();
+                        }
+
+                        @Override
+                        @NonNull
+                        public SQLDataSnapshot next() {
+                            return new SQLDataSnapshot(c.next().toString(), table);
+                        }
+
+                        @Override
+                        public void remove() {
+                            throw new UnsupportedOperationException("remove called on immutable collection");
+                        }
+                    };
+                }
+            };
         }
-
-        JsonElement jelement = new JsonParser().parse(jsonString);
-        final JsonObject jobject = jelement.getAsJsonObject();
-        final JsonArray children = jobject.getAsJsonArray("hydra:member");
-        cachedValues = new Iterable<SQLDataSnapshot>() {
-            @Override
-            public Iterator<SQLDataSnapshot> iterator() {
-                final Iterator<JsonElement> c = children.iterator();
-                return new Iterator<SQLDataSnapshot>() {
-                    @Override
-                    public boolean hasNext() {
-                        return c.hasNext();
-                    }
-
-                    @Override
-                    @NonNull
-                    public SQLDataSnapshot next() {
-                        return new SQLDataSnapshot(c.next().toString(), table);
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException("remove called on immutable collection");
-                    }
-                };
-            }
-        };
         return cachedValues;
     }
 
     @PublicApi
     public Long childrenCount() {
+        if (cachedValues != null)
+            return childrenCount;
         if (jsonString == null)
             return 0L;
         JsonElement jelement = new JsonParser().parse(jsonString);
