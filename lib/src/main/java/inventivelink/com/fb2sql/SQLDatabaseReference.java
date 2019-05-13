@@ -60,6 +60,14 @@ public class SQLDatabaseReference {
     }
 
     @PublicApi
+    public SQLDatabaseReference setGroups(String groups) {
+        addParameter("groups%5B%5D",groups);
+        return this;
+    }
+
+
+
+    @PublicApi
     public SQLDatabaseReference child(String nullablePk) {
         if (table == null)
             SQLDatabaseLogger.abort("getReference(<Table>) must be called prior to calling child().");
