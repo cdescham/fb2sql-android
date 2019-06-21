@@ -8,9 +8,10 @@
 package inventivelink.com.fb2sql;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public interface SQLValueEventListener {
-    void onDataChange(SQLDataSnapshot var1);
+    void onDataChange(@Nullable SQLDataSnapshot var1);
     void onCancelled(@NonNull SQLDatabaseError var1);
 }
 
