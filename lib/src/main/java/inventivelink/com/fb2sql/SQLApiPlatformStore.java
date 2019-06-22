@@ -196,17 +196,6 @@ public class SQLApiPlatformStore {
         return snap;
     }
 
-
-    private static synchronized  void applyEmptyTasksResult(Request request) {
-        for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
-            t.setResult(null);
-        }
-        synchronized (ongoing) {
-            ongoing.remove(request.url().toString());
-        }
-    }
-
-
     private static synchronized  void applyTasksException(Request request,Exception e) {
         for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
             t.setException(e);
@@ -244,7 +233,7 @@ public class SQLApiPlatformStore {
                             SQLDatabaseLocalCache.getInstance().put(request.url().toString(),snap);
                         }
                     } else if (response.code() == 404) {
-                        applyEmptyTasksResult(request);
+                        applyTasksResult(request,null,table);
                     }
                     else {
                         applyTasksException(request,new Exception("read exception : " + response.code()));
