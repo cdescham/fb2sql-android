@@ -13,7 +13,7 @@ public class SQLJSONIRIBuilderTransformer implements SQLJSONTransformer {
     }
 
     public Map<String, Object> transform( Map<String, Object> input) {
-        input.put(property, "/api/"+property+"s"+"/"+input.get(id));
+        input.put(property, input.get(id) != null ? "/api/"+property+"s"+"/"+input.get(id) : input.get(id));
         return input;
     }
 
