@@ -20,7 +20,7 @@ public class SQLDatabaseHelper {
     }
 
     public static String buildUriFromId(String property, String id) {
-        return "/api/"+property+"s"+"/"+id;
+        return id != null ? "/api/"+property+"s"+"/"+id : id ;
     }
 
 }
