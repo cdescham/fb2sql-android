@@ -60,7 +60,7 @@ public class SQLDataSnapshot {
                 for (SQLJSONTransformer normalizer : normalizers)
                     value = normalizer.transform(value);
             }
-            key = (String) value.get(table.substring(0, table.length() - 1)+"Id");
+            key = value.get(table.substring(0, table.length() - 1)+"Id")+"";
             cachedValue = value;
             return CustomClassMapper.convertToCustomClass(cachedValue, valueType);
         } catch (Exception e) {
