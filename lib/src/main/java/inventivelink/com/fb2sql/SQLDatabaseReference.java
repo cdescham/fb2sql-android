@@ -220,6 +220,8 @@ public class SQLDatabaseReference {
                     bouncedUpdate = deNormalize(bouncedUpdate,deNormalizers,property);
                 finalHash.put(property,bouncedUpdate.get(property));
             }
+            if (finalHash.get(table+"Id") == null)
+                finalHash.put(table+"Id",id);
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
             SQLApiPlatformStore.update(table, id, new Gson().toJson(finalHash), source,true, keepCache);
             return source.getTask();
@@ -238,6 +240,8 @@ public class SQLDatabaseReference {
             Map<String, Object> bouncedUpdate = CustomClassMapper.convertToPlainJavaTypes(map);
             if (deNormalizers != null)
                 bouncedUpdate = deNormalize(bouncedUpdate,deNormalizers,property);
+            if (bouncedUpdate.get(table+"Id") == null)
+                bouncedUpdate.put(table+"Id",id);
             String json = new Gson().toJson(bouncedUpdate);
             final TaskCompletionSource<Void> source = new TaskCompletionSource<>();
             SQLApiPlatformStore.update(table, id, json, source,true,keepCache);
