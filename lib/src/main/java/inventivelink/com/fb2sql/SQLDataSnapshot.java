@@ -8,6 +8,7 @@
 package inventivelink.com.fb2sql;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.firebase.annotations.PublicApi;
 import com.google.firebase.database.core.utilities.encoding.CustomClassMapper;
@@ -37,7 +38,7 @@ public class SQLDataSnapshot {
     }
 
     @PublicApi
-    public <T> T getValue(@NonNull Class<T> valueType) {
+    public @Nullable <T> T getValue(@NonNull Class<T> valueType) {
         if (cachedValue != null) {
             return CustomClassMapper.convertToCustomClass(cachedValue, valueType);
         }
