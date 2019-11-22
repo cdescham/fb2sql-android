@@ -198,7 +198,8 @@ public class SQLApiPlatformStore {
 
     private static synchronized  void applyTasksException(Request request,Exception e) {
         for (TaskCompletionSource<SQLDataSnapshot> t : ongoing.get(request.url().toString())) {
-            t.setException(e);
+            if (!t.getTask().isComplete())
+                t.setException(e);
         }
         synchronized (ongoing) {
             ongoing.remove(request.url().toString());
